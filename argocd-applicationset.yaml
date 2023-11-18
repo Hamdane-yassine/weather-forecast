@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: nginx-appset
+spec:
+  generators:
+  - pullRequest:
+      gitlab:
+        project: weather-forecast
+        tokenRef:
+          secretName: gitlab-token
+          key: token
+        insecure: false
+      requeueAfterSeconds: 1800
+  template:
+    metadata:
+      name: nginx-app
+      namespace: argocd
+    spec:
+      destination:
+        namespace: sdtd-project
+        server: https://kubernetes.sdtd-project.svc
+      project: default
+      syncPolicy:
+            automated:
+              prune: true
+              selfHeal: true
+      source:
+        path: k8s-manifests
+        repoURL: https://gitlab.com/Gh-Badr/weather-forecast.git
+        targetRevision: HEAD   
