@@ -1,27 +1,35 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  creationTimestamp: null
-  labels:
-    app: nginx-app
   name: nginx-app
   namespace: sdtd-project
+  labels:
+    app: nginx-app
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: nginx-app
-  strategy: {}
   template:
     metadata:
-      creationTimestamp: null
       labels:
         app: nginx-app
     spec:
+      initContainers:
+      - name: init-nginx
+        image: busybox
+        command: ['sh', '-c', 'echo "Ha hiya wa7d application de test a shabab ila bghito bdlo had message li hna w pushiw w ghadi yban nichan f site mora wa7d delai sghir hh" > /usr/share/nginx/html/index.html']
+        volumeMounts:
+        - name: html
+          mountPath: /usr/share/nginx/html
       containers:
-      - image: nginx
-        name: nginx
+      - name: nginx
+        image: nginx
         ports:
         - containerPort: 80
-        resources: {}
-status: {}
+        volumeMounts:
+        - name: html
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: html
+        emptyDir: {}
