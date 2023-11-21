@@ -18,7 +18,7 @@ spec:
       initContainers:
       - name: init-nginx
         image: busybox
-        command: ['sh', '-c', 'echo "Ha hiya wa7d application de test a shabab ila bghito bdlo had message li hna w pushiw w ghadi yban nichan f site mora wa7d delai sghir hh" > /usr/share/nginx/html/index.html']
+        command: ['sh', '-c', 'echo "hahahhahahah fi9o m3ana a shabab" > /usr/share/nginx/html/index.html']
         volumeMounts:
         - name: html
           mountPath: /usr/share/nginx/html
