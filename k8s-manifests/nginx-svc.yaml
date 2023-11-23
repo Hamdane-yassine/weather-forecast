@@ -9,11 +9,12 @@ metadata:
 spec:
   ports:
   - name: 80-80
+    nodePort: 30000
     port: 80
     protocol: TCP
     targetPort: 80
   selector:
     app: nginx-app
-  externalIPs:
-    - 192.168.7.20
-    - 192.168.7.21
+  type: NodePort
+status:
+  loadBalancer: {}
