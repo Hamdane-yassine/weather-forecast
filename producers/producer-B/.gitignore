@@ -1,1 +1,3 @@
 producer-B-env/
+*.pyc
+**/__pycache__/
