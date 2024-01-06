@@ -1,6 +1,9 @@
 const express = require('express');
+const cors = require('cors');
 const app = express();
 const port = 3001; // Use a different port from your React app
+
+app.use(cors());
 
 // Middleware to parse JSON bodies
 app.use(express.json());
