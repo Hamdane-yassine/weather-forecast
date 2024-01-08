@@ -5,6 +5,7 @@ import json
 from math import exp
 from math import pi
 from dotenv import load_dotenv
+from consumer.database import Database
 import os
 
 env = load_dotenv()
@@ -42,7 +43,27 @@ def calculate_power(wind_speed, temp, pressure, humidity=0):
     Cp = 0.4 # We suppose that the power coefficient is 0.4
     # Calculate power
     power = 0.5 * rho * S * wind_speed**3 * Cp
-    return power
+
+    return round(power, 2)
+
+def send_to_kafka(city, wind_data):
+    try:
+        # Send the data to the city topic
+        producer.send(city.replace(" ", "_"), key=city.encode(), value=wind_data)
+        producer.flush()
+    except KafkaError:
+        print("Failed to send data to Kafka")
+
+def save_to_database(data):
+    # Save the data to the database
+    database = Database()
+    # If the city is already in the database, delete it before inserting the new data
+    if database.find_one({"city": data['city']}):
+        database.delete({"city": data['city']})
+    # Insert the data
+    database.insert(data)
+    database.close()
+
 
 # Function to process data
 def process_data(data):
@@ -53,17 +74,8 @@ def process_data(data):
         forecast['power'] = calculate_power(forecast['wind']['speed'], forecast['temp'], forecast['pressure'], forecast['humidity'])
     # Send data to Kafka
     send_to_kafka(data['city'], data)
+    save_to_database(data)
 
-def send_to_kafka(city, wind_data):
-    try:
-        # Send the data to the city topic
-        producer.send(city.replace(" ", "_"), key=city.encode(), value=wind_data)
-        producer.flush()
-        # # For testing, send let's write the data to a file
-        # with open('received.json', 'a') as file:
-        #     file.write(json.dumps(wind_data, indent=4) + ",\n")
-    except KafkaError:
-        print("Failed to send data to Kafka")
 
 if __name__ == "__main__":
     try:
