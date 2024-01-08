@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import config from './config';
 import Navbar from './components/Navbar';
 import CityData from './components/CityData';
 
@@ -8,7 +9,7 @@ function App() {
   const handleCitySearch = async (city) => {
     try {
       // Make a GET request to the backend API
-      const response = await fetch(`http://localhost:3001/search?city=${encodeURIComponent(city)}`);
+      const response = await fetch(`${config.backendUrl}/search?city=${encodeURIComponent(city)}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

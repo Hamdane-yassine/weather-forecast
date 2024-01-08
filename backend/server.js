@@ -2,9 +2,12 @@ const express = require('express');
 const cors = require('cors');
 const { connectDB, getDB } = require('./database');
 const KafkaConfig = require('./kafka');
+const getCityCoords = require('./geoApi');
+const config = require('./config');
 
 const app = express();
-const port = 3001; // Use a different port from your React app
+const host = config.server.host;
+const port = config.server.port; // Use a different port from your React app
 
 const kafkaConfig = new KafkaConfig();
 
@@ -40,10 +43,12 @@ app.get('/search', async (req, res) => {
         res.json(cityData);
       } else {
         // Data not found in the database, send request to Kafka
+        const coords = await getCityCoords(city);
+        console.log(coords);
         const message = {
           city: city,
-          lat: 0,
-          lon: 0
+          lat: coords.latitude,
+          lon: coords.longitude
         };
         await kafkaConfig.produce("requests", [{ value: JSON.stringify(message) }]);
         res.status(404).send('City data requested from producer');
@@ -54,6 +59,6 @@ app.get('/search', async (req, res) => {
     }
 });
 
-app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}`);
+app.listen(port, host, () => {
+  console.log(`Server listening at http://${host}:${port}`);
 });
