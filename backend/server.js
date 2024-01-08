@@ -1,8 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const { connectDB, getDB } = require('./database');
+const KafkaConfig = require('./kafka');
+
 const app = express();
 const port = 3001; // Use a different port from your React app
+
+const kafkaConfig = new KafkaConfig();
+
 
 app.use(cors());
 
@@ -34,7 +39,14 @@ app.get('/search', async (req, res) => {
       if (cityData) {
         res.json(cityData);
       } else {
-        res.status(404).send('City not found');
+        // Data not found in the database, send request to Kafka
+        const message = {
+          city: city,
+          lat: 0,
+          lon: 0
+        };
+        await kafkaConfig.produce("requests", [{ value: JSON.stringify(message) }]);
+        res.status(404).send('City data requested from producer');
       }
     } catch (error) {
       console.log(error)
