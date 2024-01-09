@@ -5,6 +5,7 @@ import os
 class Database:
     def __init__(self):
         load_dotenv()
+        print("Connecting to database: " + os.getenv("MONGO_IP") + ":" + os.getenv("MONGO_PORT"))
         self.client = MongoClient(os.getenv("MONGO_IP"), int(os.getenv("MONGO_PORT")))
         print("Connected to database")
         self.db = self.client[os.getenv("MONGO_DB")]

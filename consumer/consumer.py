@@ -49,7 +49,7 @@ def calculate_power(wind_speed, temp, pressure, humidity=0):
 def send_to_kafka(city, wind_data):
     try:
         # Send the data to the city topic
-        producer.send(city.replace(" ", "_"), key=city.encode(), value=wind_data)
+        producer.send("response", key=city.encode(), value=wind_data)
         producer.flush()
     except KafkaError:
         print("Failed to send data to Kafka")
