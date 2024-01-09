@@ -7,7 +7,7 @@ const getCityCoords = async (cityName) => {
     const response = await axios.get(config.geoApi.geoApiBaseUrl, {
       params: { 
         namePrefix: cityName,
-        minPopulation: 100000,
+        minPopulation: 1000000,
         limit: 1 // Limit the results to 1 for direct access
       },
       headers: {
