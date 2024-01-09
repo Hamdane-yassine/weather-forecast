@@ -76,6 +76,7 @@ def get_weather_data(lat, lon):
     }
 
 def handle_request(message):
+    print("Received request for city: " + message.value['city'])
     data = message.value
     city = data['city']
     lat = data['lat']

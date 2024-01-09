@@ -19,9 +19,7 @@ const consumeCityData = (cityName, res) => {
   kafkaConfig.consume( (message) => {
     // Assuming message is JSON-formatted data
     const data = JSON.parse(message);
-    console.log(cityName);
     if (data.city == cityName){
-      console.log("zebi");
       // Send data back to the client
       res.json(data);
     }
@@ -56,7 +54,7 @@ app.get('/search', async (req, res) => {
     const db = getDB();
 
     // Query the database for the city data
-    const cityData = await db.collection('cities').findOne({ name: city });
+    const cityData = await db.collection('cities').findOne({ city: city });
       if (cityData) {
         res.json(cityData);
       } else {
