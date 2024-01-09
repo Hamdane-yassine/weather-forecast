@@ -5,7 +5,7 @@ import json
 from math import exp
 from math import pi
 from dotenv import load_dotenv
-from consumer.database import Database
+from database import Database
 import os
 
 env = load_dotenv()
@@ -87,7 +87,8 @@ if __name__ == "__main__":
         print("Consumer started on topic 'weather', broker: " + bootstrap_servers[0])
         for message in consumer:
             Thread(target=process_data, args=(message.value,)).start()
-    except KafkaError:
+    except KafkaError as e:
+        print(e)
         print("Failed to connect to Kafka")
 
 
