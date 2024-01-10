@@ -5,11 +5,11 @@ import os
 class Database:
     def __init__(self):
         load_dotenv()
-        print("Connecting to database: " + os.getenv("MONGO_IP") + ":" + os.getenv("MONGO_PORT"))
-        self.client = MongoClient(os.getenv("MONGO_IP"), int(os.getenv("MONGO_PORT")))
+        print("Connecting to database: " + os.getenv("MONGODB_URL"))
+        self.client = MongoClient(os.getenv("MONGODB_URL"))
         print("Connected to database")
-        self.db = self.client[os.getenv("MONGO_DB")]
-        self.collection = self.db[os.getenv("MONGO_COLLECTION")]
+        self.db = self.client[os.getenv("MONGODB_DB_NAME")]
+        self.collection = self.db[os.getenv("MONGODB_COLLECTION")]
 
     def insert(self, data):
         self.collection.insert_one(data)
