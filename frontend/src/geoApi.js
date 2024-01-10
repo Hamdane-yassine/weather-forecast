@@ -1,14 +1,12 @@
-require('dotenv').config();
-const axios = require('axios');
-const config = require('./config');
+import axios from 'axios';
+import config from './config';
 
-const getCityCoords = async (cityName) => {
+export const getCitiesList = async (cityPrefix) => {
   try {
     const response = await axios.get(config.geoApi.geoApiBaseUrl, {
       params: { 
-        namePrefix: cityName,
-        minPopulation: 1000000,
-        limit: 1 // Limit the results to 1 for direct access
+        namePrefix: cityPrefix,
+        minPopulation: 1000000
       },
       headers: {
         'x-rapidapi-key': config.geoApi.rapidApiKey,
@@ -17,10 +15,13 @@ const getCityCoords = async (cityName) => {
     });
 
     if (response.data && response.data.data && response.data.data.length > 0) {
-      const cityInfo = response.data.data[0];
       return {
-        latitude: cityInfo.latitude,
-        longitude: cityInfo.longitude
+        options: response.data.data.map((city) => {
+          return {
+            value: `${city.name};${city.latitude};${city.longitude}`,
+            label: `${city.name}, ${city.countryCode}`,
+          };
+        }),
       };
     }
 
@@ -30,5 +31,3 @@ const getCityCoords = async (cityName) => {
     throw error; // handle as needed
   }
 };
-
-module.exports = getCityCoords;

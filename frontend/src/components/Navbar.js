@@ -1,28 +1,30 @@
 import React, { useState } from 'react';
+import { AsyncPaginate } from 'react-select-async-paginate'
+import { getCitiesList } from '../geoApi';
+
 
 function Navbar({ onSearch }) {
-  const [city, setCity] = useState('');
+  const [cityPrefix, setCityPrefix] = useState('');
 
   const handleSearchChange = (e) => {
-    setCity(e.target.value);
+    setCityPrefix(e);
+    onSearch(e);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSearch(city);
+  const loadOptions = (cityPrefix) => {
+    return getCitiesList(cityPrefix);
   };
 
   return (
     <nav>
-      <form onSubmit={handleSubmit}>
-        <input 
-          type="text" 
-          placeholder="Enter city name" 
-          value={city} 
-          onChange={handleSearchChange} 
-        />
-        <button type="submit">Search</button>
-      </form>
+      <AsyncPaginate
+        placeholder="Enter city name"
+        debounceTimeout={1000}
+        value={cityPrefix}
+        onChange={handleSearchChange}
+        loadOptions={loadOptions}
+      />
+      
     </nav>
   );
 }
