@@ -1,0 +1,71 @@
+# Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: producer-secret
+  namespace: sdtd-project
+type: Opaque
+data:
+  WEATHER_API_KEY: NjgzMDA3NDExOGI5YWE0NzQyYzZmMDA2ZTQzODFhYjY=
+
+---
+# ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: producer-config
+  namespace: sdtd-project
+data:
+  API_URL: https://api.openweathermap.org/data/2.5
+
+---
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: producer
+  namespace: sdtd-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: producer
+  template:
+    metadata:
+      labels:
+        app: producer
+    spec:
+      containers:
+      - name: producer
+        image: hamdaneyassine/producer
+        env:
+        - name: API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: producer-config
+              key: API_URL
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          valueFrom:
+            configMapKeyRef:
+              name: kafka-config
+              key: KAFKA_BOOTSTRAP_SERVERS
+        - name: WEATHER_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: producer-secret
+              key: WEATHER_API_KEY
+
+---
+
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: producer
+  namespace: sdtd-project
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+  selector:
+    app: producer

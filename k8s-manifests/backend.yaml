@@ -1,0 +1,100 @@
+# Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backend-secret
+  namespace: sdtd-project
+type: Opaque
+data:
+  RAPIDAPI_KEY: NWFlNzNjYjhlYm1zaDIwZDhmNzMwYjZhNTkxM3AxM2RkZThqc25hYTNmZTQzZmY3YWM=
+
+---
+
+# ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: sdtd-project
+data:
+  GEOAPI_BASE_URL: https://wft-geo-db.p.rapidapi.com/v1/geo/cities
+  HOST: localhost
+  PORT: "3001"
+
+---
+
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: sdtd-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: hamdaneyassine/backend
+        env:
+        - name: MONGODB_URL
+          valueFrom:
+            configMapKeyRef:
+              name: database-config
+              key: MONGODB_URL
+        - name: MONGODB_DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: database-config
+              key: MONGODB_DB_NAME
+        - name: MONGODB_COLLECTION
+          valueFrom:
+            configMapKeyRef:
+              name: database-config
+              key: MONGODB_COLLECTION
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          valueFrom:
+            configMapKeyRef:
+              name: kafka-config
+              key: KAFKA_BOOTSTRAP_SERVERS
+        - name: RAPIDAPI_KEY
+          valueFrom:
+            secretKeyRef:
+              name: backend-secret
+              key: RAPIDAPI_KEY
+        - name: GEOAPI_BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: GEOAPI_BASE_URL
+        - name: HOST
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: HOST
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: PORT
+
+---
+
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: sdtd-project
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3001
+  selector:
+    app: backend

@@ -1,0 +1,63 @@
+# ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: database-config
+  namespace: sdtd-project
+data:
+  MONGODB_URL: mongodb://database:27017
+  MONGODB_DB_NAME: weather
+  MONGODB_COLLECTION: cities
+---
+
+# StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: database
+  namespace: sdtd-project
+spec:
+  serviceName: "database"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+      - name: database
+        image: mongo
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - name: db-data
+          mountPath: /data/db
+      volumes:
+      - name: db-config
+        configMap:
+          name: database-config
+  volumeClaimTemplates:
+  - metadata:
+      name: db-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+---
+
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: database
+  namespace: sdtd-project
+spec:
+  type: ClusterIP
+  ports:
+  - port: 27017
+  selector:
+    app: database

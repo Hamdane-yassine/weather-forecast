@@ -1,0 +1,49 @@
+# ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  namespace: sdtd-project
+data:
+  REACT_APP_BACKEND_URL: http://backend:3001
+
+---
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: sdtd-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: hamdaneyassine/frontend
+        env:
+        - name: REACT_APP_BACKEND_URL
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-config
+              key: REACT_APP_BACKEND_URL
+
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: sdtd-project
+spec:
+  type: NodePort
+  ports:
+  - port: 3000
+  selector:
+    app: frontend
