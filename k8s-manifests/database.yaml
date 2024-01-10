@@ -1,3 +1,20 @@
+# PersistentVolume
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: db-pv
+  namespace: sdtd-project
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  hostPath:
+    path: "/mnt/data"
+---
 # ConfigMap
 apiVersion: v1
 kind: ConfigMap
@@ -9,7 +26,6 @@ data:
   MONGODB_DB_NAME: weather
   MONGODB_COLLECTION: cities
 ---
-
 # StatefulSet
 apiVersion: apps/v1
 kind: StatefulSet
@@ -47,8 +63,8 @@ spec:
       resources:
         requests:
           storage: 1Gi
+      storageClassName: standard
 ---
-
 # Service
 apiVersion: v1
 kind: Service
