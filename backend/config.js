@@ -13,6 +13,9 @@ const config = {
   server: {
     host: process.env.HOST || 'localhost',
     port: process.env.PORT || 3001
+  },
+  kafka: {
+    kafkaBootstrapServers: process.env.KAFKA_BOOTSTRAP_SERVERS
   }
 };
 

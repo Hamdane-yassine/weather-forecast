@@ -9,23 +9,22 @@ const app = express();
 const host = config.server.host;
 const port = config.server.port; // Use a different port from your React app
 
+const responseMap = new Map(); // Map to store response objects
+
+//// Functions
+const processCityData = (message) => {
+  const data = JSON.parse(message);
+  const responses = responseMap.get(data.city);
+  if (responses) {
+    responses.forEach(res => res.json(data));
+    responseMap.delete(data.city); // Remove the responses from the map
+  }
+};
+
 // Instanciate and connect kafka consumer & producer
 const kafkaConfig = new KafkaConfig();
 kafkaConfig.connectProducer();
-kafkaConfig.connectAndSubscribeConsumer("response");
-
-// Function to start consuming messages for a city
-const consumeCityData = (cityName, res) => {
-  kafkaConfig.consume( (message) => {
-    // Assuming message is JSON-formatted data
-    const data = JSON.parse(message);
-    if (data.city == cityName){
-      // Send data back to the client
-      res.json(data);
-    }
-
-  });
-};
+kafkaConfig.connectSubscribeAndRunConsumer("response",processCityData);
 
 // Handle CORS issues
 app.use(cors());
@@ -68,7 +67,11 @@ app.get('/search', async (req, res) => {
         };
         await kafkaConfig.produce("requests", [{ value: JSON.stringify(message) }]);
         // res.status(404).send('City data requested from producer');
-        consumeCityData(city, res);
+        // consumeCityData(city, res);
+        if (!responseMap.has(city)) {
+          responseMap.set(city, []);
+        }
+        responseMap.get(city).push(res);
       }
     } catch (error) {
       console.log(error)
