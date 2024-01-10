@@ -27,6 +27,8 @@ spec:
       containers:
       - name: frontend
         image: hamdaneyassine/frontend
+        ports:
+        - containerPort: 3000
         env:
         - name: REACT_APP_BACKEND_URL
           valueFrom:

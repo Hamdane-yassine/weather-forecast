@@ -54,18 +54,3 @@ spec:
             secretKeyRef:
               name: producer-secret
               key: WEATHER_API_KEY
-
----
-
-# Service
-apiVersion: v1
-kind: Service
-metadata:
-  name: producer
-  namespace: sdtd-project
-spec:
-  type: ClusterIP
-  ports:
-  - port: 8080
-  selector:
-    app: producer

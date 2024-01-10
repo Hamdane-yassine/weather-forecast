@@ -17,8 +17,6 @@ spec:
       containers:
       - name: consumer
         image: hamdaneyassine/consumer
-        ports:
-        - containerPort: 8080
         env:
         - name: KAFKA_BOOTSTRAP_SERVERS
           valueFrom:
@@ -40,18 +38,3 @@ spec:
             configMapKeyRef:
               name: database-config
               key: MONGODB_COLLECTION
-
----
-
-# Service
-apiVersion: v1
-kind: Service
-metadata:
-  name: consumer
-  namespace: sdtd-project
-spec:
-  type: ClusterIP
-  ports:
-  - port: 8080
-  selector:
-    app: consumer

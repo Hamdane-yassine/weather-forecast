@@ -64,6 +64,7 @@ spec:
         requests:
           storage: 1Gi
       storageClassName: standard
+
 ---
 # Service
 apiVersion: v1
