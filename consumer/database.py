@@ -12,7 +12,8 @@ class Database:
             self.db = self.client[os.getenv("MONGODB_DB_NAME")]
             self.collection = self.db[os.getenv("MONGODB_COLLECTION")]
         except Exception as e:
-            print("Failed to connect to database: " + e)
+            print("Failed to connect to database: ")
+            print(e)
 
     def insert(self, data):
         self.collection.insert_one(data)

@@ -22,7 +22,8 @@ def send_to_kafka(city, wind_data):
         producer.send('weather', key=city.encode(), value=wind_data)
         producer.flush()
     except KafkaError as e:
-        print("Failed to send data to Kafka: " + e)
+        print("Failed to send data to Kafka: ")
+        print(e)
 
 def filter_data(city, weather_data):
     print("Filtering data for city: " + city)
@@ -121,4 +122,5 @@ if __name__ == "__main__":
         for message in consumer:
             threading.Thread(target=handle_request, args=(message,)).start()
     except KafkaError as e:
-        print("Failed to connect to Kafka: " + e)
+        print("Failed to connect to Kafka: ")
+        print(e)

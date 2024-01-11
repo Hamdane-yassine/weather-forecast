@@ -55,7 +55,8 @@ def send_to_kafka(city, wind_data):
         producer.flush()
     except KafkaError as e:
         # print the whole error stack trace
-        print("Failed to send data to Kafka: " + e)
+        print("Failed to send data to Kafka: ")
+        print(e)
 
 def save_to_database(data):
     print("Data processed and sent, saving to database for " + data['city'] + "...")
@@ -163,7 +164,8 @@ if __name__ == "__main__":
         for message in consumer:
             Thread(target=process_data, args=(message.value,)).start()
     except KafkaError as e:
-        print("Failed to connect to Kafka: " + e)
+        print("Failed to connect to Kafka: ")
+        print(e)
 
 
 
