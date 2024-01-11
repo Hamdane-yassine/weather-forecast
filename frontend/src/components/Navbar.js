@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { AsyncPaginate } from 'react-select-async-paginate'
 import { getCitiesList } from '../geoApi';
 
-
 function Navbar({ onSearch }) {
   const [cityPrefix, setCityPrefix] = useState('');
 
