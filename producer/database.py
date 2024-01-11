@@ -10,7 +10,7 @@ class Database:
             self.client = MongoClient(os.getenv("MONGODB_URL"))
             print("Connected to database")
             self.db = self.client[os.getenv("MONGODB_DB_NAME")]
-            self.collection = self.db[os.getenv("MONGODB_COLLECTION")]
+            self.collection = self.db[os.getenv("PRODUCER_MONGODB_COLLECTION")]
         except Exception as e:
             print("Failed to connect to database: " + e)
 

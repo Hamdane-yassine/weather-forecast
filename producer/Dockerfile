@@ -7,6 +7,8 @@ WORKDIR /app
 
 # Copy the producer.py file to the container
 COPY producer.py .
+COPY database.py .
+COPY __init__.py .
 
 # Install the required dependencies
 COPY requirements.txt .

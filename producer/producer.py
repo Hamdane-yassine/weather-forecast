@@ -4,11 +4,11 @@ from datetime import datetime
 import requests
 import os
 from dotenv import load_dotenv
+from database import Database
 import json
 import threading
 
-env = load_dotenv()
-pending_cities = []
+load_dotenv()
 
 def json_serializer(data):
     return json.dumps(data).encode("utf-8")
@@ -79,6 +79,21 @@ def get_weather_data(lat, lon):
         "forecast": forecast_data
     }
 
+def check_pending_cities(city):
+    # To make sure the producer is stateless, we do the check in the database
+    database = Database()
+    if database.find_one({"pending_cities": city}):
+        return True
+    # If the city is not in the database, add it (It's being processed)
+    database.insert({"pending_cities": city})
+    return False
+
+def remove_pending_city(city):
+    database = Database()
+    if database.find_one({"pending_cities": city}):
+        database.delete({"pending_cities": city})
+    database.close()
+
 def handle_request(message):
     print("****************************************************")
     print("Received request for city: " + message.value['city'])
@@ -86,15 +101,13 @@ def handle_request(message):
     city = data['city']
     lat = data['lat']
     lon = data['lon']
-    if city in pending_cities:
+    if check_pending_cities(city):
         print("City already being processed: " + city)
-        print("List of pending cities: " + str(pending_cities))
         return
-    pending_cities.append(city)
     weather_data = get_weather_data(lat, lon)
     filtered_data = filter_data(city, weather_data)
     send_to_kafka(city, filtered_data)
-    pending_cities.remove(city)
+    remove_pending_city(city)
     print("Data sent to kafka and removed from pending list: " + city)
 
 if __name__ == "__main__":
