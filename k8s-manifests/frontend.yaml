@@ -28,7 +28,7 @@ spec:
       - name: frontend
         image: hamdaneyassine/frontend:v3.0
         ports:
-        - containerPort: 3000
+        - containerPort: 80
         env:
         - name: REACT_APP_BACKEND_URL
           valueFrom:
@@ -46,6 +46,6 @@ metadata:
 spec:
   type: NodePort
   ports:
-  - port: 3000
+  - port: 80
   selector:
     app: frontend
