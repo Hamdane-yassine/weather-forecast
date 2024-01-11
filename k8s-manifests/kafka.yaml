@@ -1,3 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafdrop-config
+  namespace: sdtd-project
+data:
+  KAFKA_BROKERCONNECT: "kafka:29092"
+
+---
 # ConfigMaps
 apiVersion: v1
 kind: ConfigMap
@@ -7,7 +16,7 @@ metadata:
 data:
   KAFKA_BROKERCONNECT: "kafka:29092"
   KAFKA_LISTENERS: "INTERNAL://:29092,EXTERNAL://:9092"
-  KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka:29092,EXTERNAL://kafka:9092"
+  KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka:29092,EXTERNAL://localhost:9092"
   KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
   KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
   KAFKA_ZOOKEEPER_SESSION_TIMEOUT: "6000"
@@ -102,6 +111,43 @@ spec:
               key: ZOOKEEPER_AUTOPURGE_PURGE_INTERVAL
 ---
 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafdrop
+  namespace: sdtd-project
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafdrop
+  template:
+    metadata:
+      labels:
+        app: kafdrop
+    spec:
+      containers:
+      - name: kafdrop
+        image: obsidiandynamics/kafdrop
+        ports:
+        - containerPort: 9000
+        envFrom:
+        - configMapRef:
+            name: kafdrop-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafdrop
+  namespace: sdtd-project
+spec:
+  type: NodePort
+  ports:
+  - port: 9000
+  selector:
+    app: kafdrop
+---
 # Service
 apiVersion: v1
 kind: Service
