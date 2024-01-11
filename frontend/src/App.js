@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import config from './config';
 import Navbar from './components/Navbar';
 import WeatherInfo from './components/WeatherInfo';
 import DailyForecast from './components/DailyForecast';
@@ -12,7 +11,7 @@ function App() {
     const [city, lat, lon] = e.value.split(";");
     try {
       // Make a GET request to the backend API
-      const response = await fetch(`${config.backendUrl}/search?city=${encodeURIComponent(city)}&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`);
+      const response = await fetch(`/search?city=${encodeURIComponent(city)}&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
