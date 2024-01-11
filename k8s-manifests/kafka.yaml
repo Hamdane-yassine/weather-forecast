@@ -44,7 +44,7 @@ spec:
             command:
             - sh
             - -c
-            - nc -z kafka 29092
+            - nc -z localhost 9092
           initialDelaySeconds: 15
           periodSeconds: 3
           timeoutSeconds: 3
@@ -54,17 +54,12 @@ spec:
             command:
             - sh
             - -c
-            - nc -z kafka 29092
+            - nc -z localhost 9092
           initialDelaySeconds: 5
           periodSeconds: 3
           timeoutSeconds: 3
           failureThreshold: 10
         env:
-        - name: KAFKA_BROKERCONNECT
-          valueFrom:
-            configMapKeyRef:
-              name: kafka-config
-              key: KAFKA_BROKERCONNECT
         - name: KAFKA_LISTENERS
           valueFrom:
             configMapKeyRef:

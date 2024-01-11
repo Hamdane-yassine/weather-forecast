@@ -46,6 +46,22 @@ spec:
       containers:
       - name: database
         image: mongo
+        livenessProbe:
+          exec:
+            command:
+            - mongo
+            - --eval
+            - "db.runCommand({ ping: 1 })"
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - mongo
+            - --eval
+            - "db.runCommand({ ping: 1 })"
+          initialDelaySeconds: 5
+          periodSeconds: 10
         ports:
         - containerPort: 27017
         volumeMounts:

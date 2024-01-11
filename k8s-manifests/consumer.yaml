@@ -14,9 +14,38 @@ spec:
       labels:
         app: consumer
     spec:
+      initContainers:
+      - name: check-kafka
+        image: busybox:1.28
+        command:
+        - sh
+        - -c
+        - until nslookup kafka; do echo waiting for kafka; sleep 2; done
+      - name: check-database
+        image: busybox:1.28
+        command:
+        - sh
+        - -c
+        - until nslookup database; do echo waiting for database; sleep 2; done
       containers:
       - name: consumer
         image: hamdaneyassine/consumer
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - ps aux | grep python || exit 1
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - ps aux | grep python || exit 1
+          initialDelaySeconds: 5
+          periodSeconds: 10
         env:
         - name: KAFKA_BOOTSTRAP_SERVERS
           valueFrom:

@@ -1,3 +1,14 @@
+# Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: frontend-secret
+  namespace: sdtd-project
+type: Opaque
+data:
+  RAPIDAPI_KEY: NWFlNzNjYjhlYm1zaDIwZDhmNzMwYjZhNTkxM3AxM2RkZThqc25hYTNmZTQzZmY3YWM=
+
+---
 # ConfigMap
 apiVersion: v1
 kind: ConfigMap
@@ -6,6 +17,7 @@ metadata:
   namespace: sdtd-project
 data:
   REACT_APP_BACKEND_URL: http://backend:3001
+  GEOAPI_BASE_URL: https://wft-geo-db.p.rapidapi.com/v1/geo/cities
 
 ---
 # Deployment
@@ -24,11 +36,30 @@ spec:
       labels:
         app: frontend
     spec:
+      initContainers:
+      - name: check-backend
+        image: busybox:1.28
+        command:
+        - sh
+        - -c
+        - until nslookup backend; do echo waiting for backend; sleep 2; done
       containers:
       - name: frontend
         image: hamdaneyassine/frontend:v3.0
         ports:
         - containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
         env:
         - name: REACT_APP_BACKEND_URL
           valueFrom:
@@ -38,12 +69,12 @@ spec:
         - name: REACT_APP_RAPIDAPI_KEY
           valueFrom:
             secretKeyRef:
-              name: backend-secret
+              name: frontend-secret
               key: RAPIDAPI_KEY
         - name: REACT_APP_GEOAPI_BASE_URL
           valueFrom:
             configMapKeyRef:
-              name: backend-config
+              name: frontend-config
               key: GEOAPI_BASE_URL
 
 ---

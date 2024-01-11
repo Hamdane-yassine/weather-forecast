@@ -1,13 +1,3 @@
-# Secret
-apiVersion: v1
-kind: Secret
-metadata:
-  name: backend-secret
-  namespace: sdtd-project
-type: Opaque
-data:
-  RAPIDAPI_KEY: NWFlNzNjYjhlYm1zaDIwZDhmNzMwYjZhNTkxM3AxM2RkZThqc25hYTNmZTQzZmY3YWM=
-
 ---
 
 # ConfigMap
@@ -17,7 +7,6 @@ metadata:
   name: backend-config
   namespace: sdtd-project
 data:
-  GEOAPI_BASE_URL: https://wft-geo-db.p.rapidapi.com/v1/geo/cities
   HOST: "0.0.0.0"
   PORT: "3001"
 
@@ -39,11 +28,48 @@ spec:
       labels:
         app: backend
     spec:
+      initContainers:
+      - name: check-kafka
+        image: busybox:1.28
+        command:
+        - sh
+        - -c
+        - until nslookup kafka; do echo waiting for kafka; sleep 2; done
+      - name: check-consumer
+        image: busybox:1.28
+        command:
+        - sh
+        - -c
+        - until nslookup consumer; do echo waiting for consumer; sleep 2; done
+      - name: check-producer
+        image: busybox:1.28
+        command:
+        - sh
+        - -c
+        - until nslookup producer; do echo waiting for producer; sleep 2; done
+      - name: check-database
+        image: busybox:1.28
+        command:
+        - sh
+        - -c
+        - until nslookup database; do echo waiting for database; sleep 2; done
       containers:
       - name: backend
         image: hamdaneyassine/backend:v2.0
         ports:
         - containerPort: 3001
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3001
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3001
+          initialDelaySeconds: 5
+          periodSeconds: 10
         env:
         - name: MONGODB_URL
           valueFrom:
@@ -65,16 +91,6 @@ spec:
             configMapKeyRef:
               name: kafka-config
               key: KAFKA_BOOTSTRAP_SERVERS
-        - name: RAPIDAPI_KEY
-          valueFrom:
-            secretKeyRef:
-              name: backend-secret
-              key: RAPIDAPI_KEY
-        - name: GEOAPI_BASE_URL
-          valueFrom:
-            configMapKeyRef:
-              name: backend-config
-              key: GEOAPI_BASE_URL
         - name: HOST
           valueFrom:
             configMapKeyRef:
