@@ -6,13 +6,13 @@ class Database:
     def __init__(self):
         load_dotenv()
         try:
-            print("Connecting to database: " + os.getenv("MONGODB_URL"))
+            print("Connecting to database: " + os.getenv("MONGODB_URL"), flush=True)
             self.client = MongoClient(os.getenv("MONGODB_URL"))
-            print("Connected to database")
+            print("Connected to database", flush=True)
             self.db = self.client[os.getenv("MONGODB_DB_NAME")]
             self.collection = self.db[os.getenv("PRODUCER_MONGODB_COLLECTION")]
         except Exception as e:
-            print("Failed to connect to database: ")
+            print("Failed to connect to database: ", flush=True)
             print(e)
 
     def insert(self, data):
