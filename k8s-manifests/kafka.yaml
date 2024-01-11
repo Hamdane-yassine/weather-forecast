@@ -44,7 +44,7 @@ spec:
             command:
             - sh
             - -c
-            - nc -z kafka 9092
+            - nc -z kafka 29092
           initialDelaySeconds: 15
           periodSeconds: 3
           timeoutSeconds: 3
@@ -54,7 +54,7 @@ spec:
             command:
             - sh
             - -c
-            - nc -z kafka 9092
+            - nc -z kafka 29092
           initialDelaySeconds: 5
           periodSeconds: 3
           timeoutSeconds: 3
