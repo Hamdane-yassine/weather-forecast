@@ -49,17 +49,17 @@ spec:
         livenessProbe:
           exec:
             command:
-            - mongo
+            - /usr/bin/mongo
             - --eval
-            - "db.runCommand({ ping: 1 })"
+            - db.runCommand({ ping: 1 })
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
           exec:
             command:
-            - mongo
+            - /usr/bin/mongo
             - --eval
-            - "db.runCommand({ ping: 1 })"
+            - db.runCommand({ ping: 1 })
           initialDelaySeconds: 5
           periodSeconds: 10
         ports:
