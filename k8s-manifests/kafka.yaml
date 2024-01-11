@@ -48,6 +48,7 @@ spec:
         image: obsidiandynamics/kafka
         ports:
         - containerPort: 9092
+        - containerPort: 2181
         livenessProbe:
           exec:
             command:
@@ -159,6 +160,8 @@ spec:
   type: ClusterIP
   ports:
   - port: 9092
-    target-port: 9092
+    targetPort: 9092
+  - port: 2181  # Add this line
+    targetPort: 2181  # Add this line
   selector:
     app: kafka
