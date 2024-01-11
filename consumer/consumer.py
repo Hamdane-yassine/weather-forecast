@@ -6,6 +6,7 @@ from math import exp
 from math import pi
 from dotenv import load_dotenv
 from database import Database
+from datetime import datetime
 import os
 
 env = load_dotenv()
@@ -48,30 +49,103 @@ def calculate_power(wind_speed, temp, pressure, humidity=0):
 
 def send_to_kafka(city, wind_data):
     try:
+        print("Data processed, sending to Kafka for " + city + "...")
         # Send the data to the city topic
         producer.send("response", key=city.encode(), value=wind_data)
         producer.flush()
-    except KafkaError:
-        print("Failed to send data to Kafka")
+    except KafkaError as e:
+        # print the whole error stack trace
+        print("Failed to send data to Kafka: " + e)
 
 def save_to_database(data):
+    print("Data processed and sent, saving to database for " + data['city'] + "...")
     # Save the data to the database
     database = Database()
     # If the city is already in the database, delete it before inserting the new data
     if database.find_one({"city": data['city']}):
+        print("Data for " + data['city'] + " already in database, deleting...")
         database.delete({"city": data['city']})
     # Insert the data
     database.insert(data)
+    print("Data for " + data['city'] + " saved to database")
     database.close()
+
+def group_by_day(data):
+    # Group data by day
+    grouped_data = {}
+    for forecast in data:
+        date = forecast['dt'].split(' ')[0]
+        if date not in grouped_data:
+            grouped_data[date] = []
+        grouped_data[date].append(forecast)
+    return grouped_data
+
+def get_average(data, current_date):
+    # Calculate the average of the data
+    all_days_average = []
+    for date in data:
+        # Skip today's forecast
+        if date == current_date:
+            continue
+        day_average = {
+            "date": date,
+            "temp": 0,
+            "pressure": 0,
+            "humidity": 0,
+            "wind": {
+                "speed": 0,
+                "deg": 0,
+                "gust": 0
+            },
+            "total_power": 0,
+            "power_detail": []
+        }
+        for forecast in data[date]:
+            day_average['temp'] += forecast['temp']
+            day_average['pressure'] += forecast['pressure']
+            day_average['humidity'] += forecast['humidity']
+            day_average['wind']['speed'] += forecast['wind']['speed']
+            day_average['wind']['deg'] += forecast['wind']['deg']
+            if 'gust' in forecast['wind']:
+                day_average['wind']['gust'] += forecast['wind']['gust']
+            day_average['total_power'] += forecast['power']
+            day_average['power_detail'].append({
+                "time": forecast['dt'].split(' ')[1],
+                "power": forecast['power']
+            })
+        day_average['temp'] = round(day_average['temp'] / len(data[date]), 2)
+        day_average['pressure'] = round(day_average['pressure'] / len(data[date]), 2)
+        day_average['humidity'] = round(day_average['humidity'] / len(data[date]), 2)
+        day_average['wind']['speed'] = round(day_average['wind']['speed'] / len(data[date]), 2)
+        day_average['wind']['deg'] = round(day_average['wind']['deg'] / len(data[date]), 2)
+        if 'gust' in forecast['wind']:
+            day_average['wind']['gust'] = round(day_average['wind']['gust'] / len(data[date]), 2)
+        day_average['total_power'] = round(day_average['total_power'] / len(data[date]), 2)
+        all_days_average.append(day_average)
+    return all_days_average
+
+def format_data(data):
+    formatted_data = {
+        "timestamp": data["timestamp"],
+        "city": data["city"],
+        "current": data["current"],
+        "forecast": get_average(group_by_day(data["forecast"]), data["current"]["date"])
+    }
+
+    return formatted_data
 
 
 # Function to process data
 def process_data(data):
+    print("****************************************************")
+    print("New data received, processing for " + data['city'] + "...")
     # Calculate power for current weather and add it to the data dict
     data['current']['power'] = calculate_power(data['current']['wind']['speed'], data['current']['temp'], data['current']['pressure'], data['current']['humidity'])
     # Calculate power for forecast weather and add it to the data dict
     for forecast in data['forecast']:
         forecast['power'] = calculate_power(forecast['wind']['speed'], forecast['temp'], forecast['pressure'], forecast['humidity'])
+    # Reformat the data to send it to the database
+    data = format_data(data)
     # Send data to Kafka
     send_to_kafka(data['city'], data)
     save_to_database(data)
@@ -79,17 +153,17 @@ def process_data(data):
 
 if __name__ == "__main__":
     try:
-        # Load environment variables
+        # Connect to Kafka
         bootstrap_servers = [os.getenv('KAFKA_BOOTSTRAP_SERVERS')]
         print("Starting consumer on " + bootstrap_servers[0] + "...")
         producer = KafkaProducer(bootstrap_servers=bootstrap_servers, value_serializer=json_serializer)
         consumer = KafkaConsumer('weather', bootstrap_servers=bootstrap_servers, value_deserializer=json_deserializer)
-        print("Consumer started on topic 'weather', broker: " + bootstrap_servers[0])
+        print("A producer has been started for backend communication, broker: " + bootstrap_servers[0])
+        print("Consumer started on topic 'weather' on broker: " + bootstrap_servers[0])
         for message in consumer:
             Thread(target=process_data, args=(message.value,)).start()
     except KafkaError as e:
-        print(e)
-        print("Failed to connect to Kafka")
+        print("Failed to connect to Kafka: " + e)
 
 
 
