@@ -25,7 +25,13 @@ export const getCitiesList = async (cityPrefix) => {
       };
     }
 
-    return null;
+    return {
+      options:[{
+        value: "Error",
+        label: "City not found.",
+      }]  
+    };
+
   } catch (error) {
     console.error('Error fetching city coordinates:', error);
     throw error; // handle as needed

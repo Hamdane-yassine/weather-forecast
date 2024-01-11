@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
+import config from './config';
 import Navbar from './components/Navbar';
 import WeatherInfo from './components/WeatherInfo';
-import data from './data';
 import DailyForecast from './components/DailyForecast';
 import './style/App.css';
 
 function App() {
   const [cityData, setCityData] = useState(null);
-  const [dataa ,setDataa] = useState(data);
+  
   const handleCitySearch = async (e) => {
     const [city, lat, lon] = e.value.split(";");
     try {
       // Make a GET request to the backend API
-      const response = await fetch(`/search?city=${encodeURIComponent(city)}&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`);
+      const response = await fetch(`${config.backendUrl}/search?city=${encodeURIComponent(city)}&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -31,8 +31,10 @@ function App() {
       <div className="container">
       <Navbar onSearch={handleCitySearch} />
       </div>
-      <WeatherInfo currentData={dataa.current} forecastData={dataa.forecast} city={dataa.city} />
-      <DailyForecast forecast={dataa.forecast}/>
+      {cityData ? <WeatherInfo currentData={cityData.current} forecastData={cityData.forecast} city={cityData.city} /> : <p></p>}
+      {cityData ? <DailyForecast forecast={cityData.forecast}/> : <p></p>}
+      
+      
     
     </>
     

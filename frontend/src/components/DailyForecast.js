@@ -1,6 +1,5 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import data from '../data'; // Assurez-vous d'utiliser le bon chemin d'accès à votre fichier JSON
 import '../style/DailyForecast.css'; // Assurez-vous que le chemin d'importation est correct
 import '../style/WeatherInfo.css';
 

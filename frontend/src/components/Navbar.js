@@ -6,6 +6,10 @@ function Navbar({ onSearch }) {
   const [cityPrefix, setCityPrefix] = useState('');
 
   const handleSearchChange = (e) => {
+    if(e.value == "Error"){
+      setCityPrefix("");
+      return ; 
+    }  
     setCityPrefix(e);
     onSearch(e);
   };
