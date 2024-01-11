@@ -18,8 +18,8 @@ metadata:
   namespace: sdtd-project
 data:
   GEOAPI_BASE_URL: https://wft-geo-db.p.rapidapi.com/v1/geo/cities
-  HOST: 0.0.0.0
-  PORT: 3001
+  HOST: "0.0.0.0"
+  PORT: "3001"
 
 ---
 
