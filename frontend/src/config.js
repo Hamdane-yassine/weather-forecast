@@ -1,4 +1,3 @@
-
 const config = {
     backendUrl: process.env.REACT_APP_BACKEND_URL || 'http://localhost:3001',
     geoApi: {
@@ -7,5 +6,4 @@ const config = {
         rapidApiHost: 'wft-geo-db.p.rapidapi.com'
     }
 };
-  
 export default config;

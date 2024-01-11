@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import Navbar from './components/Navbar';
-import CityData from './components/CityData';
+import WeatherInfo from './components/WeatherInfo';
+import DailyForecast from './components/DailyForecast';
+import './style/App.css';
 
 function App() {
   const [cityData, setCityData] = useState(null);
-
+  
   const handleCitySearch = async (e) => {
     const [city, lat, lon] = e.value.split(";");
     try {
@@ -24,11 +26,17 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <>  
+      <div className="container">
       <Navbar onSearch={handleCitySearch} />
-      <CityData cityData={cityData} />
-      {/* Other components will go here */}
-    </div>
+      </div>
+      {cityData ? <WeatherInfo currentData={cityData.current} forecastData={cityData.forecast} city={cityData.city} /> : <p></p>}
+      {cityData ? <DailyForecast forecast={cityData.forecast}/> : <p></p>}
+      
+      
+    
+    </>
+    
   );
 }
 
