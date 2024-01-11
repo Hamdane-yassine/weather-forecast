@@ -35,6 +35,16 @@ spec:
             configMapKeyRef:
               name: frontend-config
               key: REACT_APP_BACKEND_URL
+        - name: REACT_APP_RAPIDAPI_KEY
+          valueFrom:
+            secretKeyRef:
+              name: backend-secret
+              key: RAPIDAPI_KEY
+        - name: REACT_APP_GEOAPI_BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: backend-config
+              key: GEOAPI_BASE_URL
 
 ---
 # Service
