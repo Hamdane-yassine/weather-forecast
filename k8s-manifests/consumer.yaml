@@ -5,7 +5,7 @@ metadata:
   name: consumer
   namespace: sdtd-project
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: consumer
@@ -29,7 +29,7 @@ spec:
         - until nslookup database; do echo waiting for database; sleep 2; done
       containers:
       - name: consumer
-        image: hamdaneyassine/consumer
+        image: hamdaneyassine/consumer:v5.0
         livenessProbe:
           exec:
             command:

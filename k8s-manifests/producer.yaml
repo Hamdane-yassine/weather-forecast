@@ -17,6 +17,7 @@ metadata:
   namespace: sdtd-project
 data:
   API_URL: https://api.openweathermap.org/data/2.5
+  PRODUCER_MONGODB_COLLECTION: pendingCities
 
 ---
 # Deployment
@@ -26,7 +27,7 @@ metadata:
   name: producer
   namespace: sdtd-project
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: producer
@@ -44,7 +45,7 @@ spec:
         - until nslookup kafka; do echo waiting for kafka; sleep 2; done
       containers:
       - name: producer
-        image: hamdaneyassine/producer
+        image: hamdaneyassine/producer:v5.0
         livenessProbe:
           exec:
             command:
@@ -67,6 +68,11 @@ spec:
             configMapKeyRef:
               name: producer-config
               key: API_URL
+        - name: PRODUCER_MONGODB_COLLECTION
+          valueFrom:
+            configMapKeyRef:
+              name: producer-config
+              key: PRODUCER_MONGODB_COLLECTION
         - name: KAFKA_BOOTSTRAP_SERVERS
           valueFrom:
             configMapKeyRef:
@@ -77,3 +83,13 @@ spec:
             secretKeyRef:
               name: producer-secret
               key: WEATHER_API_KEY
+        - name: MONGODB_URL
+          valueFrom:
+            configMapKeyRef:
+              name: database-config
+              key: MONGODB_URL
+        - name: MONGODB_DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: database-config
+              key: MONGODB_DB_NAME

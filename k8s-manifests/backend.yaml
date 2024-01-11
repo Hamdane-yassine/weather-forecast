@@ -19,7 +19,7 @@ metadata:
   name: backend
   namespace: sdtd-project
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: backend
@@ -43,9 +43,21 @@ spec:
         - until nslookup database; do echo waiting for database; sleep 2; done
       containers:
       - name: backend
-        image: hamdaneyassine/backend:v2.0
+        image: hamdaneyassine/backend:v5.0
         ports:
         - containerPort: 3001
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3001
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3001
+          initialDelaySeconds: 30
+          periodSeconds: 10
         env:
         - name: MONGODB_URL
           valueFrom:
@@ -88,6 +100,21 @@ metadata:
   namespace: sdtd-project
 spec:
   type: ClusterIP
+  ports:
+  - port: 3001
+    targetPort: 3001
+  selector:
+    app: backend
+
+---
+# NodePort Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-nodeport
+  namespace: sdtd-project
+spec:
+  type: NodePort
   ports:
   - port: 3001
     targetPort: 3001
