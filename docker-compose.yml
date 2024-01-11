@@ -71,8 +71,6 @@ services:
       MONGODB_URL: ${MONGODB_URL}
       MONGODB_DB_NAME: ${MONGODB_DB_NAME}
       MONGODB_COLLECTION: ${MONGODB_COLLECTION}
-      RAPIDAPI_KEY: ${RAPIDAPI_KEY}
-      GEOAPI_BASE_URL: ${GEOAPI_BASE_URL}
       HOST: ${HOST}
       PORT: ${PORT}
       KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
@@ -87,14 +85,15 @@ services:
         condition: service_started
 
   frontend:
-    image: frontend
     restart: "no"
     ports:
       - "3000:80"
-    environment:
-      REACT_APP_BACKEND_URL: ${REACT_APP_BACKEND_URL}
-      REACT_APP_RAPIDAPI_KEY: ${REACT_APP_RAPIDAPI_KEY}
-      REACT_APP_GEOAPI_BASE_URL: ${REACT_APP_GEOAPI_BASE_URL}
+    build:
+      context: ./frontend
+      args:
+        REACT_APP_BACKEND_URL: ${REACT_APP_BACKEND_URL}
+        REACT_APP_RAPIDAPI_KEY: ${REACT_APP_RAPIDAPI_KEY}
+        REACT_APP_GEOAPI_BASE_URL: ${REACT_APP_GEOAPI_BASE_URL}
     depends_on:
       backend:
         condition: service_started
