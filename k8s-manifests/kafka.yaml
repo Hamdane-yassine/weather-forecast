@@ -50,15 +50,25 @@ spec:
         ports:
         - containerPort: 9092
         livenessProbe:
-          tcpSocket:
-            port: 9092
+          exec:
+            command:
+            - sh
+            - -c
+            - nc -z localhost 9092
           initialDelaySeconds: 15
-          periodSeconds: 20
+          periodSeconds: 3
+          timeoutSeconds: 3
+          failureThreshold: 10
         readinessProbe:
-          tcpSocket:
-            port: 9092
+          exec:
+            command:
+            - sh
+            - -c
+            - nc -z localhost 9092
           initialDelaySeconds: 5
-          periodSeconds: 10
+          periodSeconds: 3
+          timeoutSeconds: 3
+          failureThreshold: 10
         env:
         - name: KAFKA_BROKERCONNECT
           valueFrom:
