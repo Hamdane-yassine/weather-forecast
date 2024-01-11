@@ -16,7 +16,7 @@ metadata:
 data:
   KAFKA_BROKERCONNECT: "kafka:29092"
   KAFKA_LISTENERS: "INTERNAL://:29092,EXTERNAL://:9092"
-  KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka:29092,EXTERNAL://localhost:9092"
+  KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka:29092,EXTERNAL://kafka:9092"
   KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
   KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
   KAFKA_ZOOKEEPER_SESSION_TIMEOUT: "6000"
@@ -145,6 +145,7 @@ spec:
   type: NodePort
   ports:
   - port: 9000
+    target-port: 9000
   selector:
     app: kafdrop
 ---
@@ -158,5 +159,6 @@ spec:
   type: ClusterIP
   ports:
   - port: 9092
+    target-port: 9092
   selector:
     app: kafka
