@@ -49,6 +49,7 @@ spec:
         ports:
         - containerPort: 9092
         - containerPort: 2181
+        - containerPort: 29092
         livenessProbe:
           exec:
             command:
@@ -146,9 +147,10 @@ spec:
   type: NodePort
   ports:
   - port: 9000
-    target-port: 9000
+    targetPort: 9000
   selector:
     app: kafdrop
+
 ---
 # Service
 apiVersion: v1
@@ -159,9 +161,14 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 9092
+  - name: kafka-port
+    port: 9092
     targetPort: 9092
-  - port: 2181  # Add this line
-    targetPort: 2181  # Add this line
+  - name: zookeeper-port
+    port: 2181
+    targetPort: 2181
+  - name: kafka-internal-port  # Add this line
+    port: 29092  # Add this line
+    targetPort: 29092  # Add this line
   selector:
     app: kafka

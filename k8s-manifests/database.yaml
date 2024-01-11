@@ -76,6 +76,6 @@ spec:
   type: ClusterIP
   ports:
   - port: 27017
-    target-port: 27017
+    targetPort: 27017
   selector:
     app: database
