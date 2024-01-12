@@ -5,19 +5,8 @@ metadata:
   name: kafka-config
   namespace: sdtd-project
 data:
-  KAFKA_BROKERCONNECT: "kafka:29092"
-  KAFKA_LISTENERS: "INTERNAL://:29092,EXTERNAL://:9092"
-  KAFKA_ADVERTISED_LISTENERS: "INTERNAL://kafka:29092,EXTERNAL://kafka:9092"
-  KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT"
-  KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL"
-  KAFKA_ZOOKEEPER_SESSION_TIMEOUT: "6000"
-  KAFKA_RESTART_ATTEMPTS: "10"
-  KAFKA_RESTART_DELAY: "5"
-  ZOOKEEPER_AUTOPURGE_PURGE_INTERVAL: "0"
   KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
-
 ---
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -46,7 +35,6 @@ spec:
               value: "2000"
 
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
@@ -61,7 +49,6 @@ spec:
       targetPort: 2181
 
 ---
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -102,7 +89,6 @@ spec:
               value: "1"
 
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
