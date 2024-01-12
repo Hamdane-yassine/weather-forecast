@@ -1,6 +1,9 @@
 stages:
   - build
-  - deploy
+  - front-deploy
+  - back-deploy
+  - producer-deploy
+  - consumer-deploy
 
 .build_template: &build_template
   stage: build
@@ -23,7 +26,6 @@ stages:
         - "$COMPONENT/**/*"
 
 .update_k8s_manifest_template: &update_k8s_manifest_template
-  stage: deploy
   image: alpine:latest
   variables:
     COMPONENT: ""
@@ -66,11 +68,13 @@ build-consumer:
     COMPONENT: "consumer"
 
 deploy-frontend:
+  stage: front-deploy
   extends: .update_k8s_manifest_template
   variables:
     COMPONENT: "frontend"
 
 deploy-backend:
+  stage: back-deploy
   extends: .update_k8s_manifest_template
   variables:
     COMPONENT: "backend"
@@ -78,6 +82,7 @@ deploy-backend:
     - deploy-frontend
 
 deploy-producer:
+  stage: producer-deploy
   extends: .update_k8s_manifest_template
   variables:
     COMPONENT: "producer"
@@ -85,6 +90,7 @@ deploy-producer:
     - deploy-backend
 
 deploy-consumer:
+  stage: consumer-deploy
   extends: .update_k8s_manifest_template
   variables:
     COMPONENT: "consumer"
