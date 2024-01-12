@@ -44,7 +44,7 @@ spec:
         - until nslookup database; do echo waiting for database; sleep 2; done
       containers:
       - name: backend
-        image: ghbadr/backend:0000000
+        image: hamdaneyassine/backend:v10.0
         ports:
         - containerPort: 3001
         livenessProbe:
