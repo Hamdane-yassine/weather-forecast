@@ -1,5 +1,40 @@
----
+# HPA Configuration for Backend Deployment
+apiVersion: autoscaling/v2  # HPA API version
+kind: HorizontalPodAutoscaler  # Defines this as an HPA resource
+metadata:
+  name: backend-hpa  # Name of the HPA
+  namespace: sdtd-project  # Namespace where the HPA is deployed
 
+# Specification of the HPA
+spec:
+  # Reference to the Deployment that this HPA will scale
+  scaleTargetRef:
+    apiVersion: apps/v1  # API version of the target resource
+    kind: Deployment  # Type of the target resource
+    name: backend  # Name of the Deployment that the HPA will scale
+
+  # Minimum and maximum number of pod replicas
+  minReplicas: 1  # Minimum number of replicas
+  maxReplicas: 10  # Maximum number of replicas
+
+  # Behavior of scaling down
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300  # How long to wait before another scale down operation can be performed after the current one
+      policies:
+        - type: Pods  # Scale down based on the number of Pods
+          value: 1  # Number of Pods to scale down at a time
+          periodSeconds: 60  # Interval between successive scale down operations
+
+  # Metrics for scaling
+  metrics:
+    - type: Resource  # Type of the metric to be used for scaling
+      resource:
+        name: cpu  # The resource to be monitored
+        target:
+          type: Utilization  # Utilization target type
+          averageUtilization: 50  # Target CPU utilization percentage for scaling
+---
 # ConfigMap
 apiVersion: v1
 kind: ConfigMap
@@ -9,7 +44,7 @@ metadata:
 data:
   HOST: "0.0.0.0"
   PORT: "3001"
-  KAFKA_NUM_PARTITIONS: "2"
+  KAFKA_NUM_PARTITIONS: "1"
 
 ---
 
@@ -20,7 +55,7 @@ metadata:
   name: backend
   namespace: sdtd-project
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: backend
@@ -44,9 +79,16 @@ spec:
         - until nslookup database; do echo waiting for database; sleep 2; done
       containers:
       - name: backend
-        image: hamdaneyassine/backend:v15.0
+        image: ghbadr/backend:850a1d63
         ports:
         - containerPort: 3001
+        resources:
+          requests:
+            cpu: "30m"
+            memory: "15Mi"
+          limits:
+            cpu: "80m"
+            memory: "120Mi"
         livenessProbe:
           httpGet:
             path: /

@@ -1,3 +1,40 @@
+# HPA Configuration for Producer Deployment
+apiVersion: autoscaling/v2  # HPA API version
+kind: HorizontalPodAutoscaler  # Defines this as an HPA resource
+metadata:
+  name: producer-hpa  # Name of the HPA
+  namespace: sdtd-project  # Namespace where the HPA is deployed
+
+# Specification of the HPA
+spec:
+  # Reference to the Deployment that this HPA will scale
+  scaleTargetRef:
+    apiVersion: apps/v1  # API version of the target resource
+    kind: Deployment  # Type of the target resource
+    name: producer  # Name of the Deployment that the HPA will scale
+
+  # Minimum and maximum number of pod replicas
+  minReplicas: 1  # Minimum number of replicas
+  maxReplicas: 10  # Maximum number of replicas
+
+  # Behavior of scaling down
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300  # How long to wait before another scale down operation can be performed after the current one
+      policies:
+        - type: Pods  # Scale down based on the number of Pods
+          value: 1  # Number of Pods to scale down at a time
+          periodSeconds: 60  # Interval between successive scale down operations
+
+  # Metrics for scaling
+  metrics:
+    - type: Resource  # Type of the metric to be used for scaling
+      resource:
+        name: cpu  # The resource to be monitored
+        target:
+          type: Utilization  # Utilization target type
+          averageUtilization: 50  # Target CPU utilization percentage for scaling
+---
 # ServiceAccount
 apiVersion: v1
 kind: ServiceAccount
@@ -42,7 +79,10 @@ metadata:
   namespace: sdtd-project
 type: Opaque
 data:
-  WEATHER_API_KEY: NjgzMDA3NDExOGI5YWE0NzQyYzZmMDA2ZTQzODFhYjY=
+  WEATHER_API_KEY_1: NjgzMDA3NDExOGI5YWE0NzQyYzZmMDA2ZTQzODFhYjY=
+  WEATHER_API_KEY_2: MjUwNzJhZjRlYTIxYTIzYzg0OWE1ZDhiZGMzMDhkMmQ=
+  WEATHER_API_KEY_3: YmNkYjZiMzBlZDBlZDFhNmE5ZTA3YzBjZWI3YWU1ZDM=
+  WEATHER_API_KEY_4: YTY2OGFjM2RjMmJjYzhhNjVkZGJkMWQ5ZTZhYmE5YWU=
 
 ---
 # ConfigMap
@@ -54,7 +94,8 @@ metadata:
 data:
   API_URL: https://api.openweathermap.org/data/2.5
   PRODUCER_MONGODB_COLLECTION: pendingCities
-  KAFKA_NUM_PARTITIONS: "2"
+  KAFKA_NUM_PARTITIONS: "1"
+  WEATHER_API_KEY_COUNT: "4"
 
 ---
 # Deployment
@@ -64,7 +105,7 @@ metadata:
   name: producer
   namespace: sdtd-project
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: producer
@@ -83,7 +124,14 @@ spec:
         - until nslookup kafka; do echo waiting for kafka; sleep 2; done
       containers:
       - name: producer
-        image: hamdaneyassine/producer:v15.0
+        image: ghbadr/producer:850a1d63
+        resources:
+          requests:
+            cpu: "10m"
+            memory: "15Mi"
+          limits:
+            cpu: "150m"
+            memory: "100Mi"
         livenessProbe:
           exec:
             command:
@@ -121,11 +169,26 @@ spec:
             configMapKeyRef:
               name: kafka-config
               key: KAFKA_BOOTSTRAP_SERVERS
-        - name: WEATHER_API_KEY
+        - name: WEATHER_API_KEY_1
           valueFrom:
             secretKeyRef:
               name: producer-secret
-              key: WEATHER_API_KEY
+              key: WEATHER_API_KEY_1
+        - name: WEATHER_API_KEY_2
+          valueFrom:
+            secretKeyRef:
+              name: producer-secret
+              key: WEATHER_API_KEY_2
+        - name: WEATHER_API_KEY_3
+          valueFrom:
+            secretKeyRef:
+              name: producer-secret
+              key: WEATHER_API_KEY_3
+        - name: WEATHER_API_KEY_4
+          valueFrom:
+            secretKeyRef:
+              name: producer-secret
+              key: WEATHER_API_KEY_4
         - name: MONGODB_URL
           valueFrom:
             configMapKeyRef:

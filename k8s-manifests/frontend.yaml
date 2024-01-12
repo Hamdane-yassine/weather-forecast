@@ -63,7 +63,7 @@ metadata:
   name: frontend
   namespace: sdtd-project
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: frontend
@@ -82,7 +82,7 @@ spec:
         - until nslookup backend; do echo waiting for backend; sleep 2; done
       containers:
       - name: frontend
-        image: hamdaneyassine/frontend:v5.0
+        image: ghbadr/frontend:850a1d63
         ports:
         - containerPort: 80
         livenessProbe:
