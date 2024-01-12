@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: zookeeper
-          image: confluentinc/cp-zookeeper:7.3.2
+          image: confluentinc/cp-zookeeper
           ports:
             - containerPort: 2181
               name: client
