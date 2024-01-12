@@ -154,6 +154,3 @@ if __name__ == "__main__":
     except KafkaError as e:
         print("Failed to connect to Kafka: ", flush=True)
         print(e)
-
-
-# Test CI pipeline

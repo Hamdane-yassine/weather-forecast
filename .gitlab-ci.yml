@@ -34,10 +34,10 @@ stages:
     - perl -pi -e 's|ghbadr/$ENV{COMPONENT}:.*|ghbadr/$ENV{COMPONENT}:$ENV{CI_COMMIT_SHORT_SHA}|' k8s-manifests/$COMPONENT.yaml
     - git config --global user.email "bot@example.com"
     - git config --global user.name "Project CI Bot"
-    - git pull origin main
     - git add k8s-manifests/$COMPONENT.yaml
     - git status
     - git commit -m "Update $COMPONENT image to $CI_COMMIT_SHORT_SHA"
+    - git pull origin main
     - git push "https://oauth2:$CI_DEPLOY_TOKEN@gitlab.com/Gh-Badr/weather-forecast.git" HEAD:$CI_COMMIT_BRANCH
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
