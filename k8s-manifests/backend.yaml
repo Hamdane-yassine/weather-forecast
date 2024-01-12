@@ -1,3 +1,24 @@
+# HorizontalPodAutoscaler
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: backend-hpa
+  namespace: sdtd-project
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: backend
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50
+---
 # ConfigMap
 apiVersion: v1
 kind: ConfigMap
@@ -45,6 +66,13 @@ spec:
         image: ghbadr/backend:850a1d63
         ports:
         - containerPort: 3001
+        resources:
+          requests:
+            cpu: "30m"
+            memory: "15Mi"
+          limits:
+            cpu: "80m"
+            memory: "120Mi"
         livenessProbe:
           httpGet:
             path: /
