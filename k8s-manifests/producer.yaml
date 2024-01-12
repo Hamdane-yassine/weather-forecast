@@ -125,13 +125,13 @@ spec:
       containers:
       - name: producer
         image: ghbadr/producer:7da5520c
-        resources:
-          requests:
-            cpu: "10m"
-            memory: "15Mi"
-          limits:
-            cpu: "300m"
-            memory: "200Mi"
+        # resources:
+        #   requests:
+        #     cpu: "10m"
+        #     memory: "15Mi"
+        #   limits:
+        #     cpu: "300m"
+        #     memory: "200Mi"
         livenessProbe:
           exec:
             command:

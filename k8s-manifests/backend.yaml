@@ -82,13 +82,13 @@ spec:
         image: ghbadr/backend:d94545f2
         ports:
         - containerPort: 3001
-        resources:
-          requests:
-            cpu: "30m"
-            memory: "15Mi"
-          limits:
-            cpu: "250m"
-            memory: "300Mi"
+        # resources:
+        #   requests:
+        #     cpu: "30m"
+        #     memory: "15Mi"
+        #   limits:
+        #     cpu: "250m"
+        #     memory: "300Mi"
         livenessProbe:
           httpGet:
             path: /
