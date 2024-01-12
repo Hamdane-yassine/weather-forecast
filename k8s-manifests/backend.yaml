@@ -80,15 +80,15 @@ spec:
       containers:
       - name: backend
         image: ghbadr/backend:d94545f2
+        resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
         ports:
         - containerPort: 3001
-        # resources:
-        #   requests:
-        #     cpu: "30m"
-        #     memory: "15Mi"
-        #   limits:
-        #     cpu: "250m"
-        #     memory: "300Mi"
         livenessProbe:
           httpGet:
             path: /
