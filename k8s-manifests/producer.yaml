@@ -125,12 +125,12 @@ spec:
       - name: producer
         image: ghbadr/producer:7da5520c
         resources:
-          requests:
-            cpu: "50m"
-            memory: "60Mi"
-          limits:
-            cpu: "200m"
-            memory: "250Mi"
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
         livenessProbe:
           exec:
             command:
