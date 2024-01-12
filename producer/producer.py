@@ -20,7 +20,7 @@ def json_deserializer(data):
 def send_to_kafka(city, wind_data):
     try:
         print("Data filtered, sending to Kafka for " + city + "...", flush=True)
-        producer.send('weather', key=city.encode(), value=wind_data)
+        producer.send('weather', value=wind_data)
         producer.flush()
     except KafkaError as e:
         print("Failed to send data to Kafka: ", flush=True)

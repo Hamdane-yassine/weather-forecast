@@ -24,14 +24,13 @@ stages:
 
 .update_k8s_manifest_template: &update_k8s_manifest_template
   stage: deploy
-  image: alpine:latest
+  image: debian:buster-slim
   variables:
     COMPONENT: ""
   before_script:
-    - apk add --no-cache git
+    - apt-get update && apt-get install -y git
   script:
-    - echo "$COMPONENT"
-    - echo "$CI_COMMIT_SHORT_SHA"
+    - echo "'s|ghbadr/$COMPONENT:[0-9a-fA-F]\{7\}|ghbadr/$COMPONENT:$CI_COMMIT_SHORT_SHA|g' k8s-manifests/$COMPONENT.yaml"
     - sed -i 's|ghbadr/$COMPONENT:[0-9a-fA-F]\{7\}|ghbadr/$COMPONENT:$CI_COMMIT_SHORT_SHA|g' k8s-manifests/$COMPONENT.yaml
     - git config --global user.email "bot@example.com"
     - git config --global user.name "Project CI Bot"
