@@ -83,7 +83,7 @@ spec:
         - until nslookup kafka; do echo waiting for kafka; sleep 2; done
       containers:
       - name: producer
-        image: hamdaneyassine/producer:v10.0
+        image: ghbadr/producer:0000000
         livenessProbe:
           exec:
             command:
