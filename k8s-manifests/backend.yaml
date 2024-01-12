@@ -15,7 +15,7 @@ spec:
 
   # Minimum and maximum number of pod replicas
   minReplicas: 1  # Minimum number of replicas
-  maxReplicas: 3  # Maximum number of replicas
+  maxReplicas: 2  # Maximum number of replicas
 
   behavior:
     scaleDown:
@@ -63,19 +63,19 @@ spec:
       labels:
         app: backend
     spec:
-      initContainers:
-      - name: check-kafka
-        image: busybox:1.28
-        command:
-        - sh
-        - -c
-        - until nslookup kafka; do echo waiting for kafka; sleep 2; done
-      - name: check-database
-        image: busybox:1.28
-        command:
-        - sh
-        - -c
-        - until nslookup database; do echo waiting for database; sleep 2; done
+      # initContainers:
+      # - name: check-kafka
+      #   image: busybox:1.28
+      #   command:
+      #   - sh
+      #   - -c
+      #   - until nslookup kafka; do echo waiting for kafka; sleep 2; done
+      # - name: check-database
+      #   image: busybox:1.28
+      #   command:
+      #   - sh
+      #   - -c
+      #   - until nslookup database; do echo waiting for database; sleep 2; done
       containers:
       - name: backend
         image: ghbadr/backend:d94545f2
@@ -88,18 +88,18 @@ spec:
               memory: "512Mi"
         ports:
         - containerPort: 3001
-        livenessProbe:
-          httpGet:
-            path: /
-            port: 3001
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /
-            port: 3001
-          initialDelaySeconds: 30
-          periodSeconds: 10
+        # livenessProbe:
+        #   httpGet:
+        #     path: /
+        #     port: 3001
+        #   initialDelaySeconds: 30
+        #   periodSeconds: 10
+        # readinessProbe:
+        #   httpGet:
+        #     path: /
+        #     port: 3001
+        #   initialDelaySeconds: 30
+        #   periodSeconds: 10
         env:
         - name: MONGODB_URL
           valueFrom:
