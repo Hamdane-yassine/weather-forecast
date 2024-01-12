@@ -32,7 +32,7 @@ spec:
         name: cpu  # The resource to be monitored
         target:
           type: Utilization  # Utilization target type
-          averageUtilization: 50  # Target CPU utilization percentage for scaling
+          averageUtilization: 70  # Target CPU utilization percentage for scaling
 ---
 # ConfigMap
 apiVersion: v1
