@@ -1,5 +1,6 @@
 from threading import Thread
 from kafka import KafkaConsumer, KafkaProducer
+from kafka.admin import KafkaAdminClient, NewPartitions, NewTopic
 from kafka.errors import KafkaError
 import json
 from math import exp
@@ -9,7 +10,22 @@ from database import Database
 from datetime import datetime
 import os
 
-env = load_dotenv()
+load_dotenv()
+
+def check_pending_cities(city):
+    # To make sure the consumer is stateless, we do the check in the database
+    database = Database()
+    if database.find_one({"consumer_pending_cities": city}):
+        return True
+    # If the city is not in the database, add it (It's being processed)
+    database.insert({"consumer_pending_cities": city})
+    return False
+
+def remove_pending_city(city):
+    database = Database()
+    if database.find_one({"consumer_pending_cities": city}):
+        database.delete({"consumer_pending_cities": city})
+    database.close()
 
 def json_serializer(data):
     return json.dumps(data).encode("utf-8")
@@ -155,11 +171,30 @@ def process_data(data):
 
 if __name__ == "__main__":
     try:
-        # Connect to Kafka
+        # Connect to Kafka and create the topic if it doesn't exist
         bootstrap_servers = [os.getenv('KAFKA_BOOTSTRAP_SERVERS')]
+        desired_num_partitions = os.getenv('KAFKA_NUM_PARTITIONS') == None and 2 or int(os.getenv('KAFKA_NUM_PARTITIONS'))
+        admin_client = KafkaAdminClient(bootstrap_servers=bootstrap_servers)
+        # Create the topic if it doesn't exist
+        if 'weather' not in admin_client.list_topics():
+            print("Creating topic 'weather'...", flush=True)
+            topic_list = []
+            topic_list.append(NewTopic(name="weather", num_partitions=desired_num_partitions, replication_factor=1))
+            admin_client.create_topics(new_topics=topic_list, validate_only=False)
+            print("Topic 'weather' created with " + str(desired_num_partitions) + " partitions", flush=True)
+        else:
+            # Get the number of partitions
+            print("Topic 'weather' already exists", flush=True)
+            topic_metadata = admin_client.describe_topics(topics=['weather'])
+            num_partitions = len(topic_metadata[0]['partitions'])
+            topic_partitions = {'weather': NewPartitions(total_count=num_partitions+desired_num_partitions)}
+            print("Adding " + str(desired_num_partitions) + " partitions to topic 'weather'...", flush=True)
+            admin_client.create_partitions(topic_partitions)
+
+        # Create the consumer and a producer for backend communication
         print("Starting consumer on " + bootstrap_servers[0] + "...", flush=True)
         producer = KafkaProducer(bootstrap_servers=bootstrap_servers, value_serializer=json_serializer)
-        consumer = KafkaConsumer('weather', bootstrap_servers=bootstrap_servers, value_deserializer=json_deserializer)
+        consumer = KafkaConsumer('weather', bootstrap_servers=bootstrap_servers, value_deserializer=json_deserializer, group_id="consumer")
         print("A producer has been started for backend communication, broker: " + bootstrap_servers[0], flush=True)
         print("Consumer started on topic 'weather' on broker: " + bootstrap_servers[0], flush=True)
         for message in consumer:

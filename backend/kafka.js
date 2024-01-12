@@ -6,11 +6,37 @@ class KafkaConfig {
     this.kafka = new Kafka({
       clientId: "nodejs-kafka",
       brokers: [`${config.kafka.kafkaBootstrapServers}`],
-      createPartitioner: Partitioners.LegacyPartitioner
+    });
+
+    this.kafka.admin().connect().then(() => {
+      console.log("Kafka admin connected");
+      // Check if the topic exists, otherwise create it
+      this.kafka.admin().listTopics().then((topics) => {
+        if (!topics.includes("response")) {
+          this.kafka.admin().createTopics({
+            topics: [{
+              topic: "response",
+              numPartitions: config.kafka.kafkaNumPartitions,
+              replicationFactor: 1
+            }]
+          }).then(() => console.log(`Kafka topic "response" created with ${config.kafka.kafkaNumPartitions} partitions`));
+        } else {
+          console.log(`Kafka topic "response" already exists`);
+          // Get number of partitions
+          this.kafka.admin().fetchTopicMetadata({ topics: ["response"] }).then((data) => {
+            this.kafka.admin().createPartitions({
+              topicPartitions: [{
+                topic: "response",
+                count: data.topics[0].partitions.length === 1 ? data.topics[0].partitions.length + parseInt(config.kafka.kafkaNumPartitions) - 1 : data.topics[0].partitions.length + parseInt(config.kafka.kafkaNumPartitions)
+              }]
+            }).then(() => console.log(`Added ${config.kafka.kafkaNumPartitions} partitions to "response" topic`));
+          });
+        }
+      });
     });
 
     this.producer = this.kafka.producer();
-    this.consumer = this.kafka.consumer({ groupId: 'my-consumer-group' });
+    this.consumer = this.kafka.consumer({ groupId: 'backend' });
   }
 
   async connectProducer() {

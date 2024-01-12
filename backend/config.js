@@ -10,7 +10,8 @@ const config = {
     port: process.env.PORT || 3001
   },
   kafka: {
-    kafkaBootstrapServers: process.env.KAFKA_BOOTSTRAP_SERVERS
+    kafkaBootstrapServers: process.env.KAFKA_BOOTSTRAP_SERVERS,
+    kafkaNumPartitions: process.env.KAFKA_NUM_PARTITIONS || 2
   }
 };
 

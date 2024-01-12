@@ -1,5 +1,6 @@
 from kafka import KafkaProducer, KafkaConsumer
 from kafka.errors import KafkaError
+from kafka.admin import KafkaAdminClient, NewPartitions, NewTopic
 from datetime import datetime
 import requests
 import os
@@ -88,16 +89,16 @@ def get_weather_data(lat, lon):
 def check_pending_cities(city):
     # To make sure the producer is stateless, we do the check in the database
     database = Database()
-    if database.find_one({"pending_cities": city}):
+    if database.find_one({"producer_pending_cities": city}):
         return True
     # If the city is not in the database, add it (It's being processed)
-    database.insert({"pending_cities": city})
+    database.insert({"producer_pending_cities": city})
     return False
 
 def remove_pending_city(city):
     database = Database()
-    if database.find_one({"pending_cities": city}):
-        database.delete({"pending_cities": city})
+    if database.find_one({"producer_pending_cities": city}):
+        database.delete({"producer_pending_cities": city})
     database.close()
 
 def handle_request(message):
@@ -122,10 +123,30 @@ def handle_request(message):
 
 if __name__ == "__main__":
     try:
+        # Connect to Kafka and create the topic if it doesn't exist
         bootstrap_servers = [os.getenv('KAFKA_BOOTSTRAP_SERVERS')]
+        desired_num_partitions = os.getenv('KAFKA_NUM_PARTITIONS') == None and 2 or int(os.getenv('KAFKA_NUM_PARTITIONS'))
+        admin_client = KafkaAdminClient(bootstrap_servers=bootstrap_servers)
+        # Create the topic if it doesn't exist
+        if 'requests' not in admin_client.list_topics():
+            print("Creating topic 'requests'...", flush=True)
+            topic_list = []
+            topic_list.append(NewTopic(name="requests", num_partitions=desired_num_partitions, replication_factor=1))
+            admin_client.create_topics(new_topics=topic_list, validate_only=False)
+            print("Topic 'requests' created with " + str(desired_num_partitions) + " partitions", flush=True)
+        else:
+            # Get the number of partitions
+            print("Topic 'requests' already exists", flush=True)
+            topic_metadata = admin_client.describe_topics(topics=['requests'])
+            num_partitions = len(topic_metadata[0]['partitions'])
+            topic_partitions = {'requests': NewPartitions(total_count=num_partitions+desired_num_partitions)}
+            print("Adding " + str(desired_num_partitions) + " partitions to topic 'requests'...", flush=True)
+            admin_client.create_partitions(topic_partitions)
+        
+        # Start the producer and a consumer for backend communication
         print("Starting producer on " + bootstrap_servers[0] + "...", flush=True)
         producer = KafkaProducer(bootstrap_servers=bootstrap_servers, value_serializer=json_serializer)
-        consumer = KafkaConsumer('requests', bootstrap_servers=bootstrap_servers, value_deserializer=json_deserializer)
+        consumer = KafkaConsumer('requests', bootstrap_servers=bootstrap_servers, value_deserializer=json_deserializer, group_id="producer")
         print("Producer started on broker: " + bootstrap_servers[0], flush=True)
         print("A consumer has been started for backend communication, broker: " + bootstrap_servers[0], flush=True)
         for message in consumer:
