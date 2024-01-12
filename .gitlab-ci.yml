@@ -10,11 +10,17 @@ stages:
     DOCKER_TLS_CERTDIR: "/certs"
     IMAGE_TAG: ${CI_COMMIT_TAG:-$CI_COMMIT_SHORT_SHA}
     DOCKER_BUILD_ARGS: ""
+    CI_JOB_PATH: ""
   before_script:
     - docker login -u $REGISTRY_USER -p $REGISTRY_PASS 
   script:
     - docker build $DOCKER_BUILD_ARGS -t $IMAGE_NAME:$IMAGE_TAG .
     - docker push $IMAGE_NAME:$IMAGE_TAG
+  rules:
+    - if: '$CI_COMMIT_TAG'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      changes:
+        - $CI_JOB_PATH
 
 variables:
   IMAGE_PREFIX: "$REGISTRY_USER"
@@ -24,38 +30,22 @@ build-frontend:
   variables:
     IMAGE_NAME: "$IMAGE_PREFIX/frontend"
     DOCKER_BUILD_ARGS: "--build-arg REACT_APP_RAPIDAPI_KEY=$REACT_APP_RAPIDAPI_KEY --build-arg REACT_APP_GEOAPI_BASE_URL=$REACT_APP_GEOAPI_BASE_URL"
-  only:
-    refs:
-      - main
-    changes:
-      - frontend/**/*
+    CI_JOB_PATH: "frontend/**/*"
 
 build-backend:
   extends: .build_template
   variables:
     IMAGE_NAME: "$IMAGE_PREFIX/backend"
-  only:
-    refs:
-      - main
-    changes:
-      - backend/**/*
+    CI_JOB_PATH: "backend/**/*"
 
 build-producer:
   extends: .build_template
   variables:
     IMAGE_NAME: "$IMAGE_PREFIX/producer"
-  only:
-    refs:
-      - main
-    changes:
-      - producer/**/*
+    CI_JOB_PATH: "producer"
 
 build-consumer:
   extends: .build_template
   variables:
     IMAGE_NAME: "$IMAGE_PREFIX/consumer"
-  only:
-    refs:
-      - main
-    changes:
-      - consumer/**/*
+    CI_JOB_PATH: "consumer/**/*"
