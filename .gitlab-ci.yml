@@ -30,10 +30,11 @@ stages:
   before_script:
     - apt-get update && apt-get install -y git
   script:
-    - sed -i 's|ghbadr/$COMPONENT:0000000|ghbadr/$COMPONENT:$CI_COMMIT_SHORT_SHA|' tests/k8s-manifests/$COMPONENT.yaml
+    - sed -i 's|ghbadr/$COMPONENT:.*|ghbadr/$COMPONENT:'"$CI_COMMIT_SHORT_SHA"'|' tests/k8s-manifests/$COMPONENT.yaml
     - git config --global user.email "bot@example.com"
     - git config --global user.name "Project CI Bot"
     - git add tests/k8s-manifests/$COMPONENT.yaml
+    - git status
     - git commit -m "Update $COMPONENT image to $CI_COMMIT_SHORT_SHA"
     - git push "https://oauth2:$CI_DEPLOY_TOKEN@gitlab.com/Gh-Badr/weather-forecast.git" HEAD:$CI_COMMIT_BRANCH
   rules:
