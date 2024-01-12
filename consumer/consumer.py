@@ -14,7 +14,7 @@ load_dotenv()
 
 def check_pending_cities(city):
     # To make sure the consumer is stateless, we do the check in the database
-    database = Database()
+    database = Database("pendingCities")
     if database.find_one({"consumer_pending_cities": city}):
         return True
     # If the city is not in the database, add it (It's being processed)
@@ -22,7 +22,7 @@ def check_pending_cities(city):
     return False
 
 def remove_pending_city(city):
-    database = Database()
+    database = Database("pendingCities")
     if database.find_one({"consumer_pending_cities": city}):
         database.delete({"consumer_pending_cities": city})
     database.close()
@@ -159,6 +159,10 @@ def format_data(data):
 def process_data(data):
     print("****************************************************", flush=True)
     print("New data received, processing for " + data['city'] + "...", flush=True)
+    # Check if the city is already being processed
+    if check_pending_cities(data['city']):
+        print("City " + data['city'] + " is already being processed, skipping...", flush=True)
+        return
     # Calculate power for current weather and add it to the data dict
     data['current']['power'] = calculate_power(data['current']['wind']['speed'], data['current']['temp'], data['current']['pressure'], data['current']['humidity'])
     # Calculate power for forecast weather and add it to the data dict
@@ -169,6 +173,9 @@ def process_data(data):
     # Send data to Kafka
     send_to_kafka(data['city'], data)
     save_to_database(data)
+    # Remove the city from the pending cities database
+    remove_pending_city(data['city'])
+    print("Deleted pending city: " + data['city'], flush=True)
 
 
 if __name__ == "__main__":

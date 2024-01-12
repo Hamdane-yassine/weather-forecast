@@ -3,14 +3,17 @@ from dotenv import load_dotenv
 import os
 
 class Database:
-    def __init__(self):
+    def __init__(self, collection=None):
         load_dotenv()
         try:
             print("Connecting to database: " + os.getenv("MONGODB_URL"), flush=True)
             self.client = MongoClient(os.getenv("MONGODB_URL"))
             print("Connected to database", flush=True)
             self.db = self.client[os.getenv("MONGODB_DB_NAME")]
-            self.collection = self.db[os.getenv("MONGODB_COLLECTION")]
+            if collection == None:
+                self.collection = self.db[os.getenv("MONGODB_COLLECTION")]
+            else:
+                self.collection = self.db[collection]
         except Exception as e:
             print("Failed to connect to database: ", flush=True)
             print(e)
