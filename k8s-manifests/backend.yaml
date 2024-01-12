@@ -1,17 +1,38 @@
 # HPA Configuration for Backend Deployment
-apiVersion: autoscaling/v1
-kind: HorizontalPodAutoscaler
+apiVersion: autoscaling/v2  # HPA API version
+kind: HorizontalPodAutoscaler  # Defines this as an HPA resource
 metadata:
-  name: backend-hpa
-  namespace: sdtd-project
+  name: backend-hpa  # Name of the HPA
+  namespace: sdtd-project  # Namespace where the HPA is deployed
+
+# Specification of the HPA
 spec:
+  # Reference to the Deployment that this HPA will scale
   scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: backend
-  minReplicas: 1
-  maxReplicas: 10
-  targetCPUUtilizationPercentage: 50
+    apiVersion: apps/v1  # API version of the target resource
+    kind: Deployment  # Type of the target resource
+    name: backend  # Name of the Deployment that the HPA will scale
+
+  # Minimum and maximum number of pod replicas
+  minReplicas: 1  # Minimum number of replicas
+  maxReplicas: 10  # Maximum number of replicas
+
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 600  # Increase to 10 minutes
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 120  # Increase to 2 minutes
+
+  # Metrics for scaling
+  metrics:
+    - type: Resource  # Type of the metric to be used for scaling
+      resource:
+        name: cpu  # The resource to be monitored
+        target:
+          type: Utilization  # Utilization target type
+          averageUtilization: 50  # Target CPU utilization percentage for scaling
 ---
 # ConfigMap
 apiVersion: v1
