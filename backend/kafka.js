@@ -6,6 +6,7 @@ class KafkaConfig {
     this.kafka = new Kafka({
       clientId: "nodejs-kafka",
       brokers: [`${config.kafka.kafkaBootstrapServers}`],
+      createPartitioner: Partitioners.LegacyPartitioner
     });
 
     this.kafka.admin().connect().then(() => {
@@ -16,10 +17,19 @@ class KafkaConfig {
           this.kafka.admin().createTopics({
             topics: [{
               topic: "response",
-              numPartitions: config.kafka.kafkaNumPartitions,
+              numPartitions: parseInt(config.kafka.kafkaNumPartitions),
               replicationFactor: 1
             }]
-          }).then(() => console.log(`Kafka topic "response" created with ${config.kafka.kafkaNumPartitions} partitions`));
+          }).then(() => {
+            this.kafka.admin().fetchTopicMetadata({ topics: ["response"] }).then((data) => {
+              this.kafka.admin().createPartitions({
+                topicPartitions: [{
+                  topic: "response",
+                  count: data.topics[0].partitions.length === 1 ? data.topics[0].partitions.length + parseInt(config.kafka.kafkaNumPartitions) - 1 : data.topics[0].partitions.length + parseInt(config.kafka.kafkaNumPartitions)
+                }]
+              }).then(() => console.log(`Created "response" topic with ${config.kafka.kafkaNumPartitions} partitions`));
+            });
+          });
         } else {
           console.log(`Kafka topic "response" already exists`);
           // Get number of partitions
