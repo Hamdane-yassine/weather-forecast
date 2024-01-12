@@ -30,7 +30,7 @@ spec:
         - until nslookup database; do echo waiting for database; sleep 2; done
       containers:
       - name: consumer
-        image: hamdaneyassine/consumer:v16.0
+        image: ghbadr/consumer:850a1d63
         livenessProbe:
           exec:
             command:
