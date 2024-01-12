@@ -15,15 +15,15 @@ spec:
 
   # Minimum and maximum number of pod replicas
   minReplicas: 1  # Minimum number of replicas
-  maxReplicas: 2  # Maximum number of replicas
+  maxReplicas: 5  # Maximum number of replicas
 
   behavior:
     scaleDown:
-      stabilizationWindowSeconds: 600  # Increase to 10 minutes
+      stabilizationWindowSeconds: 300  # Increase to 10 minutes
       policies:
         - type: Pods
           value: 1
-          periodSeconds: 120  # Increase to 2 minutes
+          periodSeconds: 60  # Increase to 2 minutes
 
   # Metrics for scaling
   metrics:
@@ -114,39 +114,39 @@ spec:
         app: producer
     spec:
       serviceAccountName: producer-service-account
-      # initContainers:
-      # - name: check-kafka
-      #   image: busybox:1.28
-      #   command:
-      #   - sh
-      #   - -c
-      #   - until nslookup kafka; do echo waiting for kafka; sleep 2; done
+      initContainers:
+      - name: check-kafka
+        image: busybox:1.28
+        command:
+        - sh
+        - -c
+        - until nslookup kafka; do echo waiting for kafka; sleep 2; done
       containers:
       - name: producer
         image: ghbadr/producer:7da5520c
         resources:
           requests:
-            cpu: "100m"
-            memory: "128Mi"
+            cpu: "50m"
+            memory: "60Mi"
           limits:
-            cpu: "500m"
-            memory: "512Mi"
-        # livenessProbe:
-        #   exec:
-        #     command:
-        #     - sh
-        #     - -c
-        #     - ps aux | grep python || exit 1
-        #   initialDelaySeconds: 15
-        #   periodSeconds: 20
-        # readinessProbe:
-        #   exec:
-        #     command:
-        #     - sh
-        #     - -c
-        #     - ps aux | grep python || exit 1
-        #   initialDelaySeconds: 5
-        #   periodSeconds: 10
+            cpu: "200m"
+            memory: "250Mi"
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - ps aux | grep python || exit 1
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - ps aux | grep python || exit 1
+          initialDelaySeconds: 5
+          periodSeconds: 10
         env:
         - name: API_URL
           valueFrom:
