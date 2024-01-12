@@ -54,9 +54,8 @@ def filter_data(city, weather_data):
     return wind_data
 
 def get_weather_data(lat, lon):
-    # TODO: Handle reaching API limit
     print("Getting weather data for city: " + lat + ", " + lon, flush=True)
-    api_key = os.getenv('WEATHER_API_KEY')
+    api_key = os.getenv('WEATHER_API_KEY_1')
     current_weather_url = os.getenv('API_URL') + "/weather"
     forecast_url = os.getenv('API_URL') + "/forecast"
     params = {
@@ -66,16 +65,27 @@ def get_weather_data(lat, lon):
         "units": "metric"
     }
 
-    try:
-        current_weather_response = requests.get(current_weather_url, params=params)
-        forecast_response = requests.get(forecast_url, params=params)
-    except requests.exceptions.RequestException as e:
-        print("Failed to get weather data for city: " + lat + ", " + lon, flush=True)
-        print(e)
-        return
+    data_received = False
+    times = 1
+    api_count = int(os.getenv('WEATHER_API_KEY_COUNT'))
+    print("Number of API keys: " + str(api_count), flush=True)
+    while not data_received and times < api_count:
+        try:
+            params['appid'] = os.getenv('WEATHER_API_KEY_' + str(times))
+            print("Trying with API key: " + params['appid'], flush=True)
+            current_weather_response = requests.get(current_weather_url, params=params)
+            forecast_response = requests.get(forecast_url, params=params)
+            data_received = True
+        except requests.exceptions.RequestException:
+            print("Failed to get weather data for city: " + lat + ", " + lon, flush=True)
+            print("Retrying...", flush=True)
+            times += 1
+            continue
 
     if current_weather_response.status_code != 200 or forecast_response.status_code != 200 or current_weather_response == None or forecast_response == None:
-        print("Failed to get weather data for city: " + lat + ", " + lon)
+        print("Failed to get weather data for city: " + lat + ", " + lon, flush=True)
+        print("Current weather response: " + str(current_weather_response.status_code), flush=True)
+        print("Forecast response: " + str(forecast_response.status_code), flush=True)
         return
     
     current_weather_data = current_weather_response.json()
@@ -156,4 +166,3 @@ if __name__ == "__main__":
         print(e)
 
 
-# Test CI pipeline
