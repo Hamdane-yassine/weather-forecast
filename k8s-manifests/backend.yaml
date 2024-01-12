@@ -79,7 +79,7 @@ spec:
         - until nslookup database; do echo waiting for database; sleep 2; done
       containers:
       - name: backend
-        image: ghbadr/backend:850a1d63
+        image: ghbadr/backend:ea22d4ee
         ports:
         - containerPort: 3001
         resources:
