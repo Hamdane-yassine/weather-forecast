@@ -134,3 +134,4 @@ if __name__ == "__main__":
         print("Failed to connect to Kafka: ", flush=True)
         print(e)
 
+# Test CI pipeline
