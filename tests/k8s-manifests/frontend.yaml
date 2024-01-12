@@ -1,0 +1,130 @@
+# ServiceAccount
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: frontend-service-account
+  namespace: sdtd-project
+
+---
+# Role
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: secret-reader
+  namespace: sdtd-project
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  resourceNames: ["frontend-secret"]
+  verbs: ["get", "watch", "list"]
+
+---
+# RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: read-secret
+  namespace: sdtd-project
+subjects:
+- kind: ServiceAccount
+  name: frontend-service-account
+  namespace: sdtd-project
+roleRef:
+  kind: Role
+  name: secret-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+# Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: frontend-secret
+  namespace: sdtd-project
+type: Opaque
+data:
+  RAPIDAPI_KEY: NWFlNzNjYjhlYm1zaDIwZDhmNzMwYjZhNTkxM3AxM2RkZThqc25hYTNmZTQzZmY3YWM=
+
+---
+# ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  namespace: sdtd-project
+data:
+  REACT_APP_BACKEND_URL: http://backend:3001
+  GEOAPI_BASE_URL: https://wft-geo-db.p.rapidapi.com/v1/geo/cities
+
+---
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: sdtd-project
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      serviceAccountName: frontend-service-account
+      initContainers:
+      - name: check-backend
+        image: busybox:1.28
+        command:
+        - sh
+        - -c
+        - until nslookup backend; do echo waiting for backend; sleep 2; done
+      containers:
+      - name: frontend
+        image: ghbadr/frontend:0000000
+        ports:
+        - containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        env:
+        - name: REACT_APP_BACKEND_URL
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-config
+              key: REACT_APP_BACKEND_URL
+        - name: REACT_APP_RAPIDAPI_KEY
+          valueFrom:
+            secretKeyRef:
+              name: frontend-secret
+              key: RAPIDAPI_KEY
+        - name: REACT_APP_GEOAPI_BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-config
+              key: GEOAPI_BASE_URL
+
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: sdtd-project
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: frontend

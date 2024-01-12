@@ -1,0 +1,138 @@
+# ServiceAccount
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: producer-service-account
+  namespace: sdtd-project
+
+---
+# Role
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: secret-reader
+  namespace: sdtd-project
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  resourceNames: ["producer-secret"]
+  verbs: ["get", "watch", "list"]
+
+---
+# RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: read-secret
+  namespace: sdtd-project
+subjects:
+- kind: ServiceAccount
+  name: producer-service-account
+  namespace: sdtd-project
+roleRef:
+  kind: Role
+  name: secret-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+# Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: producer-secret
+  namespace: sdtd-project
+type: Opaque
+data:
+  WEATHER_API_KEY: NjgzMDA3NDExOGI5YWE0NzQyYzZmMDA2ZTQzODFhYjY=
+
+---
+# ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: producer-config
+  namespace: sdtd-project
+data:
+  API_URL: https://api.openweathermap.org/data/2.5
+  PRODUCER_MONGODB_COLLECTION: pendingCities
+  KAFKA_NUM_PARTITIONS: "2"
+
+---
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: producer
+  namespace: sdtd-project
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: producer
+  template:
+    metadata:
+      labels:
+        app: producer
+    spec:
+      serviceAccountName: producer-service-account
+      initContainers:
+      - name: check-kafka
+        image: busybox:1.28
+        command:
+        - sh
+        - -c
+        - until nslookup kafka; do echo waiting for kafka; sleep 2; done
+      containers:
+      - name: producer
+        image: ghbadr/producer:0000000
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - ps aux | grep python || exit 1
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - ps aux | grep python || exit 1
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        env:
+        - name: API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: producer-config
+              key: API_URL
+        - name: PRODUCER_MONGODB_COLLECTION
+          valueFrom:
+            configMapKeyRef:
+              name: producer-config
+              key: PRODUCER_MONGODB_COLLECTION
+        - name: KAFKA_NUM_PARTITIONS
+          valueFrom:
+            configMapKeyRef:
+              name: producer-config
+              key: KAFKA_NUM_PARTITIONS
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          valueFrom:
+            configMapKeyRef:
+              name: kafka-config
+              key: KAFKA_BOOTSTRAP_SERVERS
+        - name: WEATHER_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: producer-secret
+              key: WEATHER_API_KEY
+        - name: MONGODB_URL
+          valueFrom:
+            configMapKeyRef:
+              name: database-config
+              key: MONGODB_URL
+        - name: MONGODB_DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: database-config
+              key: MONGODB_DB_NAME

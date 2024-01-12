@@ -1,0 +1,74 @@
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consumer
+  namespace: sdtd-project
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: consumer
+  template:
+    metadata:
+      labels:
+        app: consumer
+    spec:
+      initContainers:
+      - name: check-kafka
+        image: busybox:1.28
+        command:
+        - sh
+        - -c
+        - until nslookup kafka; do echo waiting for kafka; sleep 2; done
+      - name: check-database
+        image: busybox:1.28
+        command:
+        - sh
+        - -c
+        - until nslookup database; do echo waiting for database; sleep 2; done
+      containers:
+      - name: consumer
+        image: ghbadr/consumer:0000000
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - ps aux | grep python || exit 1
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - ps aux | grep python || exit 1
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        env:
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          valueFrom:
+            configMapKeyRef:
+              name: kafka-config
+              key: KAFKA_BOOTSTRAP_SERVERS
+        - name: MONGODB_URL
+          valueFrom:
+            configMapKeyRef:
+              name: database-config
+              key: MONGODB_URL
+        - name: MONGODB_DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: database-config
+              key: MONGODB_DB_NAME
+        - name: MONGODB_COLLECTION
+          valueFrom:
+            configMapKeyRef:
+              name: database-config
+              key: MONGODB_COLLECTION
+        - name: KAFKA_NUM_PARTITIONS
+          valueFrom:
+            configMapKeyRef:
+              name: producer-config
+              key: KAFKA_NUM_PARTITIONS
