@@ -1,0 +1,73 @@
+.weather-info {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  /* Si vos cartes ont des hauteurs différentes, cela alignera leurs tops */
+  gap: 20px;
+  /* Espace entre les cartes */
+  margin: 20px 80px 80px 80px ;
+  background: #f5f5f5;
+  /* Couleur de fond de la carte principale */
+  border: 1px solid #e0e0e0;
+  /* Bordure de la carte principale */
+  padding: 20px;
+  /* Espace interne de la carte principale */
+  border-radius: 10px;
+  /* Coins arrondis pour la carte principale */
+}
+.weather-info-f {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  /* Si vos cartes ont des hauteurs différentes, cela alignera leurs tops */
+  gap: 20px;
+  /* Espace entre les cartes */
+  margin: 10px 80px 10px 80px;
+  background: #f5f5f5;
+  /* Couleur de fond de la carte principale */
+  border: 1px solid #e0e0e0;
+  /* Bordure de la carte principale */
+  padding: 20px;
+  /* Espace interne de la carte principale */
+  border-radius: 10px;
+  /* Coins arrondis pour la carte principale */
+}
+
+.real-time-card,
+.forecast-chart-card {
+  background: white;
+  /* Couleur de fond pour les cartes individuelles */
+  border: 1px solid #e0e0e0;
+  /* Bordure pour les cartes individuelles */
+  padding: 20px;
+  /* Espace interne pour les cartes individuelles */
+  border-radius: 10px;
+  /* Coins arrondis pour les cartes individuelles */
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  /* Ombre subtile pour les cartes */
+  width: 80%;
+  /* Prend toute la largeur disponible */
+  box-sizing: border-box;
+  /* S'assure que padding et border sont inclus dans la largeur */
+}
+
+/* Vous pouvez ajouter plus de styles personnalisés ici pour les titres, paragraphes, etc. */
+
+h2 {
+  margin-bottom: 16px;
+  /* Espace sous les titres */
+}
+
+p {
+  margin-bottom: 8px;
+  /* Espace sous les paragraphes */
+}
+
+/* Style pour le graphique si nécessaire */
+.forecast-chart-card .recharts-wrapper {
+  box-shadow: none;
+  /* Si vous ne voulez pas d'ombre sur le graphique */
+}
+.Adapt{
+  margin: 30px 0 30px 0;
+}

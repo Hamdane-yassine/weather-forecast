@@ -18,15 +18,15 @@ def json_deserializer(data):
 
 def send_to_kafka(city, wind_data):
     try:
-        print("Data filtered, sending to Kafka for " + city + "...")
+        print("Data filtered, sending to Kafka for " + city + "...", flush=True)
         producer.send('weather', key=city.encode(), value=wind_data)
         producer.flush()
     except KafkaError as e:
-        print("Failed to send data to Kafka: ")
+        print("Failed to send data to Kafka: ", flush=True)
         print(e)
 
 def filter_data(city, weather_data):
-    print("Filtering data for city: " + city)
+    print("Filtering data for city: " + city, flush=True)
     current = weather_data['current_weather']
     forecast = weather_data['forecast']
     wind_data = {
@@ -54,7 +54,7 @@ def filter_data(city, weather_data):
 
 def get_weather_data(lat, lon):
     # TODO: Handle reaching API limit
-    print("Getting weather data for city: " + lat + ", " + lon)
+    print("Getting weather data for city: " + lat + ", " + lon, flush=True)
     api_key = os.getenv('WEATHER_API_KEY')
     current_weather_url = os.getenv('API_URL') + "/weather"
     forecast_url = os.getenv('API_URL') + "/forecast"
@@ -65,10 +65,15 @@ def get_weather_data(lat, lon):
         "units": "metric"
     }
 
-    current_weather_response = requests.get(current_weather_url, params=params)
-    forecast_response = requests.get(forecast_url, params=params)
+    try:
+        current_weather_response = requests.get(current_weather_url, params=params)
+        forecast_response = requests.get(forecast_url, params=params)
+    except requests.exceptions.RequestException as e:
+        print("Failed to get weather data for city: " + lat + ", " + lon, flush=True)
+        print(e)
+        return
 
-    if current_weather_response.status_code != 200 or forecast_response.status_code != 200:
+    if current_weather_response.status_code != 200 or forecast_response.status_code != 200 or current_weather_response == None or forecast_response == None:
         print("Failed to get weather data for city: " + lat + ", " + lon)
         return
     
@@ -96,33 +101,37 @@ def remove_pending_city(city):
     database.close()
 
 def handle_request(message):
-    print("****************************************************")
-    print("Received request for city: " + message.value['city'])
+    print("****************************************************", flush=True)
+    print("Received request for city: " + message.value['city'], flush=True)
     data = message.value
     city = data['city']
     lat = data['lat']
     lon = data['lon']
     if check_pending_cities(city):
-        print("City already being processed: " + city)
+        print("City already being processed: " + city, flush=True)
         return
     weather_data = get_weather_data(lat, lon)
+    if weather_data == None:
+        print("Failed to get weather data for city: " + city, flush=True)
+        remove_pending_city(city)
+        return
     filtered_data = filter_data(city, weather_data)
     send_to_kafka(city, filtered_data)
     remove_pending_city(city)
-    print("Data sent to kafka and removed from pending list: " + city)
+    print("Data sent to kafka and removed from pending list: " + city, flush=True)
 
 if __name__ == "__main__":
     try:
         bootstrap_servers = [os.getenv('KAFKA_BOOTSTRAP_SERVERS')]
-        print("Starting producer on " + bootstrap_servers[0] + "...")
+        print("Starting producer on " + bootstrap_servers[0] + "...", flush=True)
         producer = KafkaProducer(bootstrap_servers=bootstrap_servers, value_serializer=json_serializer)
         consumer = KafkaConsumer('requests', bootstrap_servers=bootstrap_servers, value_deserializer=json_deserializer)
-        print("Producer started on broker: " + bootstrap_servers[0])
-        print("A consumer has been started for backend communication, broker: " + bootstrap_servers[0])
+        print("Producer started on broker: " + bootstrap_servers[0], flush=True)
+        print("A consumer has been started for backend communication, broker: " + bootstrap_servers[0], flush=True)
         for message in consumer:
             threading.Thread(target=handle_request, args=(message,)).start()
     except KafkaError as e:
-        print("Failed to connect to Kafka: ")
+        print("Failed to connect to Kafka: ", flush=True)
         print(e)
 
 # Test CI pipeline

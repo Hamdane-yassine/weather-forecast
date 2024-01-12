@@ -13,9 +13,14 @@ const responseMap = new Map(); // Map to store response objects
 //// Functions
 const processCityData = (message) => {
   const data = JSON.parse(message);
+  console.log("Received message from consumer : "+data.city);
   const responses = responseMap.get(data.city);
   if (responses) {
-    responses.forEach(res => res.json(data));
+    responses.forEach(res => {
+      console.log("Responding to requests about : "+data.city);
+      res.json(data);
+      console.log("Response sent to requests about : "+data.city);
+    });
     responseMap.delete(data.city); // Remove the responses from the map
   }
 };

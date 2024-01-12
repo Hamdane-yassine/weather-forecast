@@ -49,26 +49,27 @@ def calculate_power(wind_speed, temp, pressure, humidity=0):
 
 def send_to_kafka(city, wind_data):
     try:
-        print("Data processed, sending to Kafka for " + city + "...")
+        print("Data processed, sending to Kafka for " + city + "...", flush=True)
         # Send the data to the city topic
         producer.send("response", key=city.encode(), value=wind_data)
         producer.flush()
     except KafkaError as e:
-        # print the whole error stack trace
-        print("Failed to send data to Kafka: ")
+        print("Failed to send data to Kafka: ", flush=True)
         print(e)
 
 def save_to_database(data):
-    print("Data processed and sent, saving to database for " + data['city'] + "...")
+    print("Data processed and sent, saving to database for " + data['city'] + "...", flush=True)
+    # Before saving the data, change timestamp to datetime
+    data['timestamp'] = datetime.fromisoformat(data['timestamp'])
     # Save the data to the database
     database = Database()
     # If the city is already in the database, delete it before inserting the new data
     if database.find_one({"city": data['city']}):
-        print("Data for " + data['city'] + " already in database, deleting...")
+        print("Data for " + data['city'] + " already in database, deleting...", flush=True)
         database.delete({"city": data['city']})
     # Insert the data
     database.insert(data)
-    print("Data for " + data['city'] + " saved to database")
+    print("Data for " + data['city'] + " saved to database", flush=True)
     database.close()
 
 def group_by_day(data):
@@ -138,8 +139,8 @@ def format_data(data):
 
 # Function to process data
 def process_data(data):
-    print("****************************************************")
-    print("New data received, processing for " + data['city'] + "...")
+    print("****************************************************", flush=True)
+    print("New data received, processing for " + data['city'] + "...", flush=True)
     # Calculate power for current weather and add it to the data dict
     data['current']['power'] = calculate_power(data['current']['wind']['speed'], data['current']['temp'], data['current']['pressure'], data['current']['humidity'])
     # Calculate power for forecast weather and add it to the data dict
@@ -156,15 +157,15 @@ if __name__ == "__main__":
     try:
         # Connect to Kafka
         bootstrap_servers = [os.getenv('KAFKA_BOOTSTRAP_SERVERS')]
-        print("Starting consumer on " + bootstrap_servers[0] + "...")
+        print("Starting consumer on " + bootstrap_servers[0] + "...", flush=True)
         producer = KafkaProducer(bootstrap_servers=bootstrap_servers, value_serializer=json_serializer)
         consumer = KafkaConsumer('weather', bootstrap_servers=bootstrap_servers, value_deserializer=json_deserializer)
-        print("A producer has been started for backend communication, broker: " + bootstrap_servers[0])
-        print("Consumer started on topic 'weather' on broker: " + bootstrap_servers[0])
+        print("A producer has been started for backend communication, broker: " + bootstrap_servers[0], flush=True)
+        print("Consumer started on topic 'weather' on broker: " + bootstrap_servers[0], flush=True)
         for message in consumer:
             Thread(target=process_data, args=(message.value,)).start()
     except KafkaError as e:
-        print("Failed to connect to Kafka: ")
+        print("Failed to connect to Kafka: ", flush=True)
         print(e)
 
 
