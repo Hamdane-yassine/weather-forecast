@@ -19,11 +19,11 @@ spec:
 
   behavior:
     scaleDown:
-      stabilizationWindowSeconds: 300  # Increase to 10 minutes
+      stabilizationWindowSeconds: 150  # Increase to 10 minutes
       policies:
         - type: Pods
           value: 1
-          periodSeconds: 60  # Increase to 2 minutes
+          periodSeconds: 30  # Increase to 2 minutes
 
   # Metrics for scaling
   metrics:
