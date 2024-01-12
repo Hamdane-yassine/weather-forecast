@@ -79,7 +79,10 @@ metadata:
   namespace: sdtd-project
 type: Opaque
 data:
-  WEATHER_API_KEY: NjgzMDA3NDExOGI5YWE0NzQyYzZmMDA2ZTQzODFhYjY=
+  WEATHER_API_KEY_1: NjgzMDA3NDExOGI5YWE0NzQyYzZmMDA2ZTQzODFhYjY=
+  WEATHER_API_KEY_2: MjUwNzJhZjRlYTIxYTIzYzg0OWE1ZDhiZGMzMDhkMmQ=
+  WEATHER_API_KEY_3: YmNkYjZiMzBlZDBlZDFhNmE5ZTA3YzBjZWI3YWU1ZDM=
+  WEATHER_API_KEY_4: YTY2OGFjM2RjMmJjYzhhNjVkZGJkMWQ5ZTZhYmE5YWU=
 
 ---
 # ConfigMap
@@ -92,6 +95,7 @@ data:
   API_URL: https://api.openweathermap.org/data/2.5
   PRODUCER_MONGODB_COLLECTION: pendingCities
   KAFKA_NUM_PARTITIONS: "1"
+  WEATHER_API_KEY_COUNT: "4"
 
 ---
 # Deployment
@@ -165,11 +169,26 @@ spec:
             configMapKeyRef:
               name: kafka-config
               key: KAFKA_BOOTSTRAP_SERVERS
-        - name: WEATHER_API_KEY
+        - name: WEATHER_API_KEY_1
           valueFrom:
             secretKeyRef:
               name: producer-secret
-              key: WEATHER_API_KEY
+              key: WEATHER_API_KEY_1
+        - name: WEATHER_API_KEY_2
+          valueFrom:
+            secretKeyRef:
+              name: producer-secret
+              key: WEATHER_API_KEY_2
+        - name: WEATHER_API_KEY_3
+          valueFrom:
+            secretKeyRef:
+              name: producer-secret
+              key: WEATHER_API_KEY_3
+        - name: WEATHER_API_KEY_4
+          valueFrom:
+            secretKeyRef:
+              name: producer-secret
+              key: WEATHER_API_KEY_4
         - name: MONGODB_URL
           valueFrom:
             configMapKeyRef:
