@@ -42,7 +42,7 @@ build-producer:
   extends: .build_template
   variables:
     IMAGE_NAME: "$IMAGE_PREFIX/producer"
-    CI_JOB_PATH: "producer"
+    CI_JOB_PATH: "producer/**/*"
 
 build-consumer:
   extends: .build_template
