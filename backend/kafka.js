@@ -21,14 +21,16 @@ class KafkaConfig {
               replicationFactor: 1
             }]
           }).then(() => {
-            this.kafka.admin().fetchTopicMetadata({ topics: ["response"] }).then((data) => {
-              this.kafka.admin().createPartitions({
-                topicPartitions: [{
-                  topic: "response",
-                  count: data.topics[0].partitions.length === 1 ? data.topics[0].partitions.length + parseInt(config.kafka.kafkaNumPartitions) - 1 : data.topics[0].partitions.length + parseInt(config.kafka.kafkaNumPartitions)
-                }]
-              }).then(() => console.log(`Created "response" topic with ${config.kafka.kafkaNumPartitions} partitions`));
-            });
+            if(parseInt(config.kafka.kafkaNumPartitions) > 1){
+              this.kafka.admin().fetchTopicMetadata({ topics: ["response"] }).then((data) => {
+                this.kafka.admin().createPartitions({
+                  topicPartitions: [{
+                    topic: "response",
+                    count: data.topics[0].partitions.length === 1 ? data.topics[0].partitions.length + parseInt(config.kafka.kafkaNumPartitions) - 1 : data.topics[0].partitions.length + parseInt(config.kafka.kafkaNumPartitions)
+                  }]
+                }).then(() => console.log(`Created "response" topic with ${config.kafka.kafkaNumPartitions} partitions`));
+              });
+            }
           });
         } else {
           console.log(`Kafka topic "response" already exists`);
