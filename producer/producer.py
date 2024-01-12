@@ -69,24 +69,23 @@ def get_weather_data(lat, lon):
     times = 1
     api_count = int(os.getenv('WEATHER_API_KEY_COUNT'))
     print("Number of API keys: " + str(api_count), flush=True)
-    while not data_received and times < api_count:
-        try:
-            params['appid'] = os.getenv('WEATHER_API_KEY_' + str(times))
-            print("Trying with API key: " + params['appid'], flush=True)
-            current_weather_response = requests.get(current_weather_url, params=params)
-            forecast_response = requests.get(forecast_url, params=params)
+    while not data_received and times <= api_count:
+        params['appid'] = os.getenv('WEATHER_API_KEY_' + str(times))
+        print("Trying with API key: " + params['appid'], flush=True)
+        current_weather_response = requests.get(current_weather_url, params=params)
+        forecast_response = requests.get(forecast_url, params=params)
+        if current_weather_response.status_code == 200 and forecast_response.status_code == 200 and current_weather_response != None and forecast_response != None:
             data_received = True
-        except requests.exceptions.RequestException:
+        else:
             print("Failed to get weather data for city: " + lat + ", " + lon, flush=True)
-            print("Retrying...", flush=True)
+            print("Current weather response: " + str(current_weather_response.status_code), flush=True)
+            print("Forecast response: " + str(forecast_response.status_code), flush=True)
+            print("Trying with another API key...", flush=True)
             times += 1
-            continue
-
-    if current_weather_response.status_code != 200 or forecast_response.status_code != 200 or current_weather_response == None or forecast_response == None:
+    if not data_received:
         print("Failed to get weather data for city: " + lat + ", " + lon, flush=True)
-        print("Current weather response: " + str(current_weather_response.status_code), flush=True)
-        print("Forecast response: " + str(forecast_response.status_code), flush=True)
-        return
+        print("Exiting...", flush=True)
+        return None
     
     current_weather_data = current_weather_response.json()
     forecast_data = forecast_response.json()
