@@ -54,7 +54,7 @@ metadata:
 data:
   API_URL: https://api.openweathermap.org/data/2.5
   PRODUCER_MONGODB_COLLECTION: pendingCities
-  KAFKA_NUM_PARTITIONS: "2"
+  KAFKA_NUM_PARTITIONS: "1"
 
 ---
 # Deployment
@@ -64,7 +64,7 @@ metadata:
   name: producer
   namespace: sdtd-project
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: producer
