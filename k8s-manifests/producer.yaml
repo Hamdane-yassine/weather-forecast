@@ -54,6 +54,7 @@ metadata:
 data:
   API_URL: https://api.openweathermap.org/data/2.5
   PRODUCER_MONGODB_COLLECTION: pendingCities
+  KAFKA_NUM_PARTITIONS: "2"
 
 ---
 # Deployment
@@ -63,7 +64,7 @@ metadata:
   name: producer
   namespace: sdtd-project
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: producer
@@ -82,7 +83,7 @@ spec:
         - until nslookup kafka; do echo waiting for kafka; sleep 2; done
       containers:
       - name: producer
-        image: ghbadr/producer:0000000
+        image: hamdaneyassine/producer:v10.0
         livenessProbe:
           exec:
             command:
@@ -110,6 +111,11 @@ spec:
             configMapKeyRef:
               name: producer-config
               key: PRODUCER_MONGODB_COLLECTION
+        - name: KAFKA_NUM_PARTITIONS
+          valueFrom:
+            configMapKeyRef:
+              name: producer-config
+              key: KAFKA_NUM_PARTITIONS
         - name: KAFKA_BOOTSTRAP_SERVERS
           valueFrom:
             configMapKeyRef:

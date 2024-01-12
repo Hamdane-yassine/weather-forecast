@@ -5,7 +5,7 @@ metadata:
   name: consumer
   namespace: sdtd-project
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: consumer
@@ -29,7 +29,7 @@ spec:
         - until nslookup database; do echo waiting for database; sleep 2; done
       containers:
       - name: consumer
-        image: ghbadr/consumer:0000000
+        image: hamdaneyassine/consumer:v10.0
         livenessProbe:
           exec:
             command:
@@ -67,3 +67,8 @@ spec:
             configMapKeyRef:
               name: database-config
               key: MONGODB_COLLECTION
+        - name: KAFKA_NUM_PARTITIONS
+          valueFrom:
+            configMapKeyRef:
+              name: producer-config
+              key: KAFKA_NUM_PARTITIONS
