@@ -164,6 +164,11 @@ spec:
             configMapKeyRef:
               name: producer-config
               key: KAFKA_NUM_PARTITIONS
+        - name: WEATHER_API_KEY_COUNT
+          valueFrom:
+            configMapKeyRef:
+              name: producer-config
+              key: WEATHER_API_KEY_COUNT
         - name: KAFKA_BOOTSTRAP_SERVERS
           valueFrom:
             configMapKeyRef:
