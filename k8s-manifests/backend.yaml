@@ -19,7 +19,7 @@ metadata:
   name: backend
   namespace: sdtd-project
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: backend
@@ -43,7 +43,7 @@ spec:
         - until nslookup database; do echo waiting for database; sleep 2; done
       containers:
       - name: backend
-        image: hamdaneyassine/backend:v5.0
+        image: hamdaneyassine/backend:v6.0
         ports:
         - containerPort: 3001
         livenessProbe:
