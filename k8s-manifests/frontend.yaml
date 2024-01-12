@@ -82,7 +82,7 @@ spec:
         - until nslookup backend; do echo waiting for backend; sleep 2; done
       containers:
       - name: frontend
-        image: ghbadr/frontend:ea22d4ee
+        image: ghbadr/frontend:d94545f2
         ports:
         - containerPort: 80
         livenessProbe:
