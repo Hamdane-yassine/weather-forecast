@@ -33,12 +33,6 @@ spec:
         target:
           type: Utilization  # Utilization target type
           averageUtilization: 70  # Target CPU utilization percentage for scaling
-    - type: Resource  # Type of the metric to be used for scaling
-      resource:
-        name: memory  # The resource to be monitored
-        target:
-          type: Utilization  # Utilization target type
-          averageUtilization: 70  # Target memory utilization percentage for scaling
 ---
 # ServiceAccount
 apiVersion: v1
@@ -132,8 +126,8 @@ spec:
         image: ghbadr/producer:7da5520c
         resources:
             requests:
-              cpu: "100m"
-              memory: "128Mi"
+              cpu: "1000m"
+              memory: "1000Mi"
             limits:
               cpu: "1000m"
               memory: "1000Mi"
