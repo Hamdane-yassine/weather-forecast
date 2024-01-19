@@ -72,14 +72,19 @@ def get_weather_data(lat, lon):
     while not data_received and times <= api_count:
         params['appid'] = os.getenv('WEATHER_API_KEY_' + str(times))
         print("Trying with API key: " + params['appid'], flush=True)
-        current_weather_response = requests.get(current_weather_url, params=params)
-        forecast_response = requests.get(forecast_url, params=params)
-        if current_weather_response.status_code == 200 and forecast_response.status_code == 200 and current_weather_response != None and forecast_response != None:
-            data_received = True
-        else:
-            print("Failed to get weather data for city: " + lat + ", " + lon, flush=True)
-            print("Current weather response: " + str(current_weather_response.status_code), flush=True)
-            print("Forecast response: " + str(forecast_response.status_code), flush=True)
+        try:
+            current_weather_response = requests.get(current_weather_url, params=params)
+            forecast_response = requests.get(forecast_url, params=params)
+            if current_weather_response.status_code == 200 and forecast_response.status_code == 200 and current_weather_response != None and forecast_response != None:
+                data_received = True
+            else:
+                print("Failed to get weather data for city: " + lat + ", " + lon, flush=True)
+                print("Current weather response: " + str(current_weather_response.status_code), flush=True)
+                print("Forecast response: " + str(forecast_response.status_code), flush=True)
+                print("Trying with another API key...", flush=True)
+                times += 1
+        except requests.exceptions.SSLError as e:
+            print("SSL Error occurred: ", e)
             print("Trying with another API key...", flush=True)
             times += 1
     if not data_received:
