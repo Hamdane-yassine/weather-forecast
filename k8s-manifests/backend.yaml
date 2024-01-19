@@ -17,14 +17,13 @@ spec:
   minReplicas: 1  # Minimum number of replicas
   maxReplicas: 10  # Maximum number of replicas
 
-  # Behavior of scaling down
   behavior:
     scaleDown:
-      stabilizationWindowSeconds: 300  # How long to wait before another scale down operation can be performed after the current one
+      stabilizationWindowSeconds: 150  # Increase to 10 minutes
       policies:
-        - type: Pods  # Scale down based on the number of Pods
-          value: 1  # Number of Pods to scale down at a time
-          periodSeconds: 60  # Interval between successive scale down operations
+        - type: Pods
+          value: 1
+          periodSeconds: 30  # Increase to 2 minutes
 
   # Metrics for scaling
   metrics:
@@ -33,7 +32,7 @@ spec:
         name: cpu  # The resource to be monitored
         target:
           type: Utilization  # Utilization target type
-          averageUtilization: 50  # Target CPU utilization percentage for scaling
+          averageUtilization: 70  # Target CPU utilization percentage for scaling
 ---
 # ConfigMap
 apiVersion: v1
@@ -55,7 +54,7 @@ metadata:
   name: backend
   namespace: sdtd-project
 spec:
-  replicas: 1
+  # replicas: 1
   selector:
     matchLabels:
       app: backend
@@ -80,15 +79,15 @@ spec:
       containers:
       - name: backend
         image: ghbadr/backend:d94545f2
+        resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
         ports:
         - containerPort: 3001
-        resources:
-          requests:
-            cpu: "30m"
-            memory: "15Mi"
-          limits:
-            cpu: "80m"
-            memory: "120Mi"
         livenessProbe:
           httpGet:
             path: /
