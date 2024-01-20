@@ -172,10 +172,16 @@ if __name__ == "__main__":
         print("Producer started on broker: " + bootstrap_servers[0], flush=True)
         print("A consumer has been started for backend communication, broker: " + bootstrap_servers[0], flush=True)
         for message in consumer:
-            print(f"Active threads: {threading.active_count()}", flush=True)
-            print("Starting a new thread to handle the request...", flush=True)
-            threading.Thread(target=handle_request, args=(message,)).start()
-            print("Thread started, new number of active threads: " + str(threading.active_count()), flush=True)
+            try:
+                print(f"Active threads: {threading.active_count()}", flush=True)
+                print("Starting a new thread to handle the request...", flush=True)
+                threading.Thread(target=handle_request, args=(message,)).start()
+                print("Thread started, new number of active threads: " + str(threading.active_count()), flush=True)
+            except Exception as e:
+                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
+                print(f"Active threads: {threading.active_count()}", flush=True)
+                print("Failed to start a new thread: ", flush=True)
+                print(e)
     except KafkaError as e:
         print("Failed to connect to Kafka: ", flush=True)
         print(e)
