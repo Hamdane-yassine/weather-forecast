@@ -128,9 +128,6 @@ spec:
             requests:
               cpu: "1000m"
               memory: "1000Mi"
-            limits:
-              cpu: "1000m"
-              memory: "1000Mi"
         livenessProbe:
           exec:
             command:
