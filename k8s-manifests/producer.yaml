@@ -95,6 +95,7 @@ data:
   PRODUCER_MONGODB_COLLECTION: pendingCities
   KAFKA_NUM_PARTITIONS: "1"
   WEATHER_API_KEY_COUNT: "4"
+  PRODUCER_MAX_WORKERS: "1"
 
 ---
 # Deployment
@@ -123,7 +124,7 @@ spec:
         - until nslookup kafka; do echo waiting for kafka; sleep 2; done
       containers:
       - name: producer
-        image: ghbadr/producer:0403d1b6
+        image: ghbadr/producer:d426be77
         resources:
             requests:
               cpu: "1000m"
@@ -165,6 +166,11 @@ spec:
             configMapKeyRef:
               name: producer-config
               key: WEATHER_API_KEY_COUNT
+        - name: PRODUCER_MAX_WORKERS
+          valueFrom:
+            configMapKeyRef:
+              name: producer-config
+              key: PRODUCER_MAX_WORKERS
         - name: KAFKA_BOOTSTRAP_SERVERS
           valueFrom:
             configMapKeyRef:
