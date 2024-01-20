@@ -67,45 +67,40 @@ def get_weather_data(lat, lon):
     }
 
     # Get the last used API key from the api_keys list
-    # with lock:
-    #     api_key = api_keys.pop(0)
-    #     params['appid'] = api_key
-    #     api_keys.append(api_key)
-    # print("Trying with API key: " + params['appid'], flush=True)
-    # try:
-    #     current_weather_response = requests.get(current_weather_url, params=params)
-    #     forecast_response = requests.get(forecast_url, params=params)
-    #     if current_weather_response.status_code == 200 and forecast_response.status_code == 200 and current_weather_response != None and forecast_response != None:
-    #         print("Successfully got weather data for city: " + lat + ", " + lon, flush=True)
-    #     else:
-    #         print("Failed to get weather data for city: " + lat + ", " + lon, flush=True)
-    #         print("Current weather response: " + str(current_weather_response.status_code), flush=True)
-    #         print("Forecast response: " + str(forecast_response.status_code), flush=True)
-    #         return None
-    # except Exception as e:
-    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-    #     print("An exception occurred while trying to get weather data for city: ", flush=True)
-    #     print(e)
-    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-    #     return None
-    
-    # current_weather_data = current_weather_response.json()
-    # forecast_data = forecast_response.json()
-
+    with lock:
+        api_key = api_keys.pop(0)
+        params['appid'] = api_key
+        api_keys.append(api_key)
+        
     session = requests.Session()
     adapter = requests.adapters.HTTPAdapter(pool_connections=1000, pool_maxsize=1000)
     session.mount('https://', adapter)
-    # simulate HTTP requests
-    test = requests.get('https://httpbin.org/get')
-    test2 = requests.get('https://httpbin.org/get')
-    print("test: " + str(test.status_code), flush=True)
-    print("test2: " + str(test2.status_code), flush=True)
+    print("Trying with API key: " + params['appid'], flush=True)
+    try:
+        current_weather_response = session.get(current_weather_url, params=params)
+        forecast_response = session.get(forecast_url, params=params)
+        if current_weather_response.status_code == 200 and forecast_response.status_code == 200 and current_weather_response != None and forecast_response != None:
+            print("Successfully got weather data for city: " + lat + ", " + lon, flush=True)
+        else:
+            print("Failed to get weather data for city: " + lat + ", " + lon, flush=True)
+            print("Current weather response: " + str(current_weather_response.status_code), flush=True)
+            print("Forecast response: " + str(forecast_response.status_code), flush=True)
+            return None
+    except Exception as e:
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
+        print("An exception occurred while trying to get weather data for city: ", flush=True)
+        print(e)
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
+        return None
+    
+    current_weather_data = current_weather_response.json()
+    forecast_data = forecast_response.json()
 
     # Get test data from current.json and forecast.json
     current_weather_data = None

@@ -9,9 +9,6 @@ WORKDIR /app
 COPY producer.py .
 COPY database.py .
 COPY __init__.py .
-# For test purposes
-COPY current.json .
-COPY forecast.json .
 
 # Install the required dependencies
 COPY requirements.txt .
