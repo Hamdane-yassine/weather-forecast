@@ -129,7 +129,7 @@ spec:
         - until nslookup kafka; do echo waiting for kafka; sleep 2; done
       containers:
       - name: producer
-        image: ghbadr/producer:36f97e59
+        image: ghbadr/producer:a0b64b11
         resources:
             requests:
               cpu: "1000m"
