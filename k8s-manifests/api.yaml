@@ -1,0 +1,76 @@
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-backend
+spec:
+  selector:
+    matchLabels:
+      app: web-backend
+  template:
+    metadata:
+      labels:
+        app: web-backend
+    spec:
+      containers:
+      - name: web-backend
+        image: ghbadr/node-api
+        ports:
+        - containerPort: 3000
+        resources:
+          requests:
+            cpu: "100m"
+          limits:
+            cpu: "500m"
+
+---
+
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-backend-service
+spec:
+  type: NodePort
+  selector:
+    app: web-backend
+  ports:
+    - protocol: TCP
+      port: 3000
+      nodePort: 31111
+
+---
+
+# HPA Configuration for Producer Deployment
+apiVersion: autoscaling/v2  # HPA API version
+kind: HorizontalPodAutoscaler  # Defines this as an HPA resource
+metadata:
+  name: back-hpa  # Name of the HPA
+# Specification of the HPA
+spec:
+  # Reference to the Deployment that this HPA will scale
+  scaleTargetRef:
+    apiVersion: apps/v1  # API version of the target resource
+    kind: Deployment  # Type of the target resource
+    name: web-backend  # Name of the Deployment that the HPA will scale
+
+  # Minimum and maximum number of pod replicas
+  minReplicas: 1  # Minimum number of replicas
+  maxReplicas: 20  # Maximum number of replicas
+
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 150  # Increase to 10 minutes
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 30  # Increase to 2 minutes
+
+  # Metrics for scaling
+  metrics:
+    - type: Resource  # Type of the metric to be used for scaling
+      resource:
+        name: cpu  # The resource to be monitored
+        target:
+          type: Utilization  # Utilization target type
+          averageUtilization: 50  # Target CPU utilization percentage for scaling
