@@ -110,7 +110,7 @@ metadata:
   name: producer
   namespace: sdtd-project
 spec:
-  replicas: 5
+  replicas: 4
   selector:
     matchLabels:
       app: producer
