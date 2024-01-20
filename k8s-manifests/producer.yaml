@@ -95,6 +95,7 @@ data:
   PRODUCER_MONGODB_COLLECTION: pendingCities
   KAFKA_NUM_PARTITIONS: "1"
   WEATHER_API_KEY_COUNT: "4"
+  PRODUCER_MAX_WORKERS: "5"
 
 ---
 # Deployment
@@ -165,6 +166,11 @@ spec:
             configMapKeyRef:
               name: producer-config
               key: WEATHER_API_KEY_COUNT
+        - name: PRODUCER_MAX_WORKERS
+          valueFrom:
+            configMapKeyRef:
+              name: producer-config
+              key: PRODUCER_MAX_WORKERS
         - name: KAFKA_BOOTSTRAP_SERVERS
           valueFrom:
             configMapKeyRef:
