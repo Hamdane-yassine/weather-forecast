@@ -14,7 +14,7 @@ spec:
     name: producer  # Name of the Deployment that the HPA will scale
 
   # Minimum and maximum number of pod replicas
-  minReplicas: 1  # Minimum number of replicas
+  minReplicas: 3  # Minimum number of replicas
   maxReplicas: 20  # Maximum number of replicas
 
   behavior:
@@ -32,13 +32,8 @@ spec:
         name: cpu  # The resource to be monitored
         target:
           type: Utilization  # Utilization target type
-          averageUtilization: 70  # Target CPU utilization percentage for scaling
-    - type: Resource  # Type of the metric to be used for scaling
-      resource:
-        name: memory  # The resource to be monitored
-        target:
-          type: Utilization  # Utilization target type
-          averageUtilization: 70  # Target CPU utilization percentage for scaling
+          averageUtilization: 50  # Target CPU utilization percentage for scaling
+
 ---
 # ServiceAccount
 apiVersion: v1
@@ -110,7 +105,6 @@ metadata:
   name: producer
   namespace: sdtd-project
 spec:
-  # replicas: 1
   selector:
     matchLabels:
       app: producer
@@ -129,11 +123,11 @@ spec:
         - until nslookup kafka; do echo waiting for kafka; sleep 2; done
       containers:
       - name: producer
-        image: ghbadr/producer:a0b64b11
+        image: ghbadr/producer:8092dfac
         resources:
             requests:
-              cpu: "1000m"
-              memory: "1000Mi"
+              cpu: "300m"
+              memory: "200Mi"
         livenessProbe:
           exec:
             command:
