@@ -66,40 +66,33 @@ def get_weather_data(lat, lon):
         "units": "metric"
     }
 
-    data_received = False
-    times = 1
-    api_count = int(os.getenv('WEATHER_API_KEY_COUNT'))
-    print("Number of API keys: " + str(api_count), flush=True)
-    while not data_received and times <= api_count:
-        params['appid'] = os.getenv('WEATHER_API_KEY_' + str(times))
-        print("Trying with API key: " + params['appid'], flush=True)
-        try:
-            current_weather_response = requests.get(current_weather_url, params=params)
-            forecast_response = requests.get(forecast_url, params=params)
-            if current_weather_response.status_code == 200 and forecast_response.status_code == 200 and current_weather_response != None and forecast_response != None:
-                data_received = True
-            else:
-                print("Failed to get weather data for city: " + lat + ", " + lon, flush=True)
-                print("Current weather response: " + str(current_weather_response.status_code), flush=True)
-                print("Forecast response: " + str(forecast_response.status_code), flush=True)
-                print("Trying with another API key...", flush=True)
-                times += 1
-        except Exception as e:
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-            print("An exception occurred while trying to get weather data for city: ", flush=True)
-            print(e)
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-            print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-            print("Trying with another API key...", flush=True)
-            times += 1
-    if not data_received:
-        print("Failed to get weather data for city: " + lat + ", " + lon, flush=True)
-        print("Exiting...", flush=True)
+    # Get the last used API key from the api_keys list
+    with lock:
+        api_key = api_keys.pop(0)
+        params['appid'] = api_key
+        api_keys.append(api_key)
+    print("Trying with API key: " + params['appid'], flush=True)
+    try:
+        current_weather_response = requests.get(current_weather_url, params=params)
+        forecast_response = requests.get(forecast_url, params=params)
+        if current_weather_response.status_code == 200 and forecast_response.status_code == 200 and current_weather_response != None and forecast_response != None:
+            print("Successfully got weather data for city: " + lat + ", " + lon, flush=True)
+        else:
+            print("Failed to get weather data for city: " + lat + ", " + lon, flush=True)
+            print("Current weather response: " + str(current_weather_response.status_code), flush=True)
+            print("Forecast response: " + str(forecast_response.status_code), flush=True)
+            return None
+    except Exception as e:
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
+        print("An exception occurred while trying to get weather data for city: ", flush=True)
+        print(e)
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
         return None
     
     current_weather_data = current_weather_response.json()
@@ -173,6 +166,16 @@ if __name__ == "__main__":
         consumer = KafkaConsumer('requests', bootstrap_servers=bootstrap_servers, value_deserializer=json_deserializer, group_id="producer")
         print("Producer started on broker: " + bootstrap_servers[0], flush=True)
         print("A consumer has been started for backend communication, broker: " + bootstrap_servers[0], flush=True)
+        # Get all api keys
+        api_keys = []
+        for key in os.environ:
+            if key.startswith('WEATHER_API_KEY_'):
+                api_keys.append(os.getenv(key))
+        print("All API keys loaded: ", flush=True)
+        print(api_keys, flush=True)
+        # Create a lock for the api_keys list
+        lock = threading.Lock()
+        # Start the thread pool
         max_workers = os.getenv('PRODUCER_MAX_WORKERS') == None and 20 or int(os.getenv('PRODUCER_MAX_WORKERS'))
         executor = ThreadPoolExecutor(max_workers=max_workers)
         try:
