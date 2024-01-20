@@ -126,7 +126,7 @@ spec:
         image: ghbadr/producer:8092dfac
         resources:
             requests:
-              cpu: "500m"
+              cpu: "300m"
               memory: "200Mi"
         livenessProbe:
           exec:
