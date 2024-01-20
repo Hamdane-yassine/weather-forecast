@@ -98,12 +98,12 @@ def get_weather_data(lat, lon):
     # current_weather_data = current_weather_response.json()
     # forecast_data = forecast_response.json()
 
-    # session = requests.Session()
-    # adapter = requests.adapters.HTTPAdapter(pool_connections=100, pool_maxsize=100)
-    # session.mount('https://', adapter)
+    session = requests.Session()
+    adapter = requests.adapters.HTTPAdapter(pool_connections=1000, pool_maxsize=1000)
+    session.mount('http://', adapter)
     # simulate HTTP requests
-    current_weather_data = requests.get('http://34.155.42.77:8082/api/current')
-    forecast_data = requests.get('http://34.155.42.77:8082/api/forecast')
+    current_weather_data = session.get('http://34.155.42.77:8082/api/current')
+    forecast_data = session.get('http://34.155.42.77:8082/api/forecast')
     print("current_weather_data: " + str(current_weather_data.status_code), flush=True)
     print("forecast_data: " + str(forecast_data.status_code), flush=True)
 
