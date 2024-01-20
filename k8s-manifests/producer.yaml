@@ -100,7 +100,6 @@ data:
   API_URL: https://api.openweathermap.org/data/2.5
   PRODUCER_MONGODB_COLLECTION: pendingCities
   KAFKA_NUM_PARTITIONS: "1"
-  WEATHER_API_KEY_COUNT: "4"
   PRODUCER_MAX_WORKERS: "20"
 
 ---
