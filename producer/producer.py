@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 from kafka import KafkaProducer, KafkaConsumer
 from kafka.errors import KafkaError
 from kafka.admin import KafkaAdminClient, NewPartitions, NewTopic
@@ -83,12 +84,13 @@ def get_weather_data(lat, lon):
                 print("Forecast response: " + str(forecast_response.status_code), flush=True)
                 print("Trying with another API key...", flush=True)
                 times += 1
-        except requests.exceptions.SSLError as e:
+        except Exception as e:
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-            print("SSL Error occurred: ", e)
+            print("An exception occurred while trying to get weather data for city: ", flush=True)
+            print(e)
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
             print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
@@ -171,17 +173,17 @@ if __name__ == "__main__":
         consumer = KafkaConsumer('requests', bootstrap_servers=bootstrap_servers, value_deserializer=json_deserializer, group_id="producer")
         print("Producer started on broker: " + bootstrap_servers[0], flush=True)
         print("A consumer has been started for backend communication, broker: " + bootstrap_servers[0], flush=True)
-        for message in consumer:
-            try:
+        max_workers = os.getenv('PRODUCER_MAX_WORKERS') == None and 20 or int(os.getenv('PRODUCER_MAX_WORKERS'))
+        executor = ThreadPoolExecutor(max_workers=max_workers)
+        try:
+            for message in consumer:
+                # Submit tasks to the thread pool
+                executor.submit(handle_request, message)
                 print(f"Active threads: {threading.active_count()}", flush=True)
-                print("Starting a new thread to handle the request...", flush=True)
-                threading.Thread(target=handle_request, args=(message,)).start()
-                print("Thread started, new number of active threads: " + str(threading.active_count()), flush=True)
-            except Exception as e:
-                print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-                print(f"Active threads: {threading.active_count()}", flush=True)
-                print("Failed to start a new thread: ", flush=True)
-                print(e)
+                print(f"Pending tasks: {executor._work_queue.qsize()}", flush=True)
+        finally:
+            # Shutdown the executor when done
+            executor.shutdown(wait=True)
     except KafkaError as e:
         print("Failed to connect to Kafka: ", flush=True)
         print(e)
