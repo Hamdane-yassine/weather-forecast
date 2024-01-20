@@ -98,19 +98,14 @@ def get_weather_data(lat, lon):
     # current_weather_data = current_weather_response.json()
     # forecast_data = forecast_response.json()
 
+    # session = requests.Session()
+    # adapter = requests.adapters.HTTPAdapter(pool_connections=100, pool_maxsize=100)
+    # session.mount('https://', adapter)
     # simulate HTTP requests
-    test = requests.get('https://httpbin.org/get')
-    test2 = requests.get('https://httpbin.org/get')
-    print("test: " + str(test.status_code), flush=True)
-    print("test2: " + str(test2.status_code), flush=True)
-
-    # Get test data from current.json and forecast.json
-    current_weather_data = None
-    forecast_data = None
-    with open('current.json') as f:
-        current_weather_data = json.load(f)
-    with open('forecast.json') as f:
-        forecast_data = json.load(f)
+    current_weather_data = requests.get('http://34.155.42.77:8082/api/current')
+    forecast_data = requests.get('http://34.155.42.77:8082/api/forecast')
+    print("current_weather_data: " + str(current_weather_data.status_code), flush=True)
+    print("forecast_data: " + str(forecast_data.status_code), flush=True)
 
     return {
         "current_weather": current_weather_data,
