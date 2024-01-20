@@ -1,44 +1,44 @@
-# HPA Configuration for Producer Deployment
-apiVersion: autoscaling/v2  # HPA API version
-kind: HorizontalPodAutoscaler  # Defines this as an HPA resource
-metadata:
-  name: producer-hpa  # Name of the HPA
-  namespace: sdtd-project  # Namespace where the HPA is deployed
+# # HPA Configuration for Producer Deployment
+# apiVersion: autoscaling/v2  # HPA API version
+# kind: HorizontalPodAutoscaler  # Defines this as an HPA resource
+# metadata:
+#   name: producer-hpa  # Name of the HPA
+#   namespace: sdtd-project  # Namespace where the HPA is deployed
 
-# Specification of the HPA
-spec:
-  # Reference to the Deployment that this HPA will scale
-  scaleTargetRef:
-    apiVersion: apps/v1  # API version of the target resource
-    kind: Deployment  # Type of the target resource
-    name: producer  # Name of the Deployment that the HPA will scale
+# # Specification of the HPA
+# spec:
+#   # Reference to the Deployment that this HPA will scale
+#   scaleTargetRef:
+#     apiVersion: apps/v1  # API version of the target resource
+#     kind: Deployment  # Type of the target resource
+#     name: producer  # Name of the Deployment that the HPA will scale
 
-  # Minimum and maximum number of pod replicas
-  minReplicas: 1  # Minimum number of replicas
-  maxReplicas: 20  # Maximum number of replicas
+#   # Minimum and maximum number of pod replicas
+#   minReplicas: 1  # Minimum number of replicas
+#   maxReplicas: 20  # Maximum number of replicas
 
-  behavior:
-    scaleDown:
-      stabilizationWindowSeconds: 150  # Increase to 10 minutes
-      policies:
-        - type: Pods
-          value: 1
-          periodSeconds: 30  # Increase to 2 minutes
+#   behavior:
+#     scaleDown:
+#       stabilizationWindowSeconds: 150  # Increase to 10 minutes
+#       policies:
+#         - type: Pods
+#           value: 1
+#           periodSeconds: 30  # Increase to 2 minutes
 
-  # Metrics for scaling
-  metrics:
-    - type: Resource  # Type of the metric to be used for scaling
-      resource:
-        name: cpu  # The resource to be monitored
-        target:
-          type: Utilization  # Utilization target type
-          averageUtilization: 70  # Target CPU utilization percentage for scaling
-    - type: Resource  # Type of the metric to be used for scaling
-      resource:
-        name: memory  # The resource to be monitored
-        target:
-          type: Utilization  # Utilization target type
-          averageUtilization: 70  # Target CPU utilization percentage for scaling
+#   # Metrics for scaling
+#   metrics:
+#     - type: Resource  # Type of the metric to be used for scaling
+#       resource:
+#         name: cpu  # The resource to be monitored
+#         target:
+#           type: Utilization  # Utilization target type
+#           averageUtilization: 70  # Target CPU utilization percentage for scaling
+#     - type: Resource  # Type of the metric to be used for scaling
+#       resource:
+#         name: memory  # The resource to be monitored
+#         target:
+#           type: Utilization  # Utilization target type
+#           averageUtilization: 70  # Target CPU utilization percentage for scaling
 ---
 # ServiceAccount
 apiVersion: v1
@@ -110,7 +110,7 @@ metadata:
   name: producer
   namespace: sdtd-project
 spec:
-  # replicas: 1
+  replicas: 5
   selector:
     matchLabels:
       app: producer
