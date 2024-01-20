@@ -14,7 +14,7 @@ spec:
     name: producer  # Name of the Deployment that the HPA will scale
 
   # Minimum and maximum number of pod replicas
-  minReplicas: 3  # Minimum number of replicas
+  minReplicas: 5  # Minimum number of replicas
   maxReplicas: 20  # Maximum number of replicas
 
   behavior:
