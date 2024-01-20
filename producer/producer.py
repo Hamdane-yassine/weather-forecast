@@ -98,6 +98,12 @@ def get_weather_data(lat, lon):
     # current_weather_data = current_weather_response.json()
     # forecast_data = forecast_response.json()
 
+    # simulate HTTP requests
+    test = requests.get('https://httpbin.org/get')
+    test2 = requests.get('https://httpbin.org/get')
+    print("test: " + str(test.status_code), flush=True)
+    print("test2: " + str(test2.status_code), flush=True)
+
     # Get test data from current.json and forecast.json
     current_weather_data = None
     forecast_data = None
