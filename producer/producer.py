@@ -67,36 +67,44 @@ def get_weather_data(lat, lon):
     }
 
     # Get the last used API key from the api_keys list
-    with lock:
-        api_key = api_keys.pop(0)
-        params['appid'] = api_key
-        api_keys.append(api_key)
-    print("Trying with API key: " + params['appid'], flush=True)
-    try:
-        current_weather_response = requests.get(current_weather_url, params=params)
-        forecast_response = requests.get(forecast_url, params=params)
-        if current_weather_response.status_code == 200 and forecast_response.status_code == 200 and current_weather_response != None and forecast_response != None:
-            print("Successfully got weather data for city: " + lat + ", " + lon, flush=True)
-        else:
-            print("Failed to get weather data for city: " + lat + ", " + lon, flush=True)
-            print("Current weather response: " + str(current_weather_response.status_code), flush=True)
-            print("Forecast response: " + str(forecast_response.status_code), flush=True)
-            return None
-    except Exception as e:
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-        print("An exception occurred while trying to get weather data for city: ", flush=True)
-        print(e)
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
-        return None
+    # with lock:
+    #     api_key = api_keys.pop(0)
+    #     params['appid'] = api_key
+    #     api_keys.append(api_key)
+    # print("Trying with API key: " + params['appid'], flush=True)
+    # try:
+    #     current_weather_response = requests.get(current_weather_url, params=params)
+    #     forecast_response = requests.get(forecast_url, params=params)
+    #     if current_weather_response.status_code == 200 and forecast_response.status_code == 200 and current_weather_response != None and forecast_response != None:
+    #         print("Successfully got weather data for city: " + lat + ", " + lon, flush=True)
+    #     else:
+    #         print("Failed to get weather data for city: " + lat + ", " + lon, flush=True)
+    #         print("Current weather response: " + str(current_weather_response.status_code), flush=True)
+    #         print("Forecast response: " + str(forecast_response.status_code), flush=True)
+    #         return None
+    # except Exception as e:
+    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
+    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
+    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
+    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
+    #     print("An exception occurred while trying to get weather data for city: ", flush=True)
+    #     print(e)
+    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
+    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
+    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
+    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", flush=True)
+    #     return None
     
-    current_weather_data = current_weather_response.json()
-    forecast_data = forecast_response.json()
+    # current_weather_data = current_weather_response.json()
+    # forecast_data = forecast_response.json()
+
+    # Get test data from current.json and forecast.json
+    current_weather_data = None
+    forecast_data = None
+    with open('current.json') as f:
+        current_weather_data = json.load(f)
+    with open('forecast.json') as f:
+        forecast_data = json.load(f)
 
     return {
         "current_weather": current_weather_data,
@@ -184,6 +192,7 @@ if __name__ == "__main__":
                 executor.submit(handle_request, message)
                 print(f"Active threads: {threading.active_count()}", flush=True)
                 print(f"Pending tasks: {executor._work_queue.qsize()}", flush=True)
+                
         finally:
             # Shutdown the executor when done
             executor.shutdown(wait=True)
