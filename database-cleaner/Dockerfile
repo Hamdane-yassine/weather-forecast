@@ -15,3 +15,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Set the entrypoint command
 CMD ["python", "database_cleaner.py"]
+
