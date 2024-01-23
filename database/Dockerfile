@@ -1,6 +1,17 @@
-FROM mongo:latest
+# Specify the base image
+FROM python:3.11
 
-EXPOSE 27017
+# Set the working directory inside the container
+WORKDIR /app
 
-# Run the MongoDB server by default when the container starts.
-CMD ["mongod"]
+# Copy the consumer and database client files to the working directory
+COPY database_cleaner.py .
+COPY database.py .
+COPY __init__.py .
+
+# Install the required dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Set the entrypoint command
+CMD ["python", "database_cleaner.py"]
