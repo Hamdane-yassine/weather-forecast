@@ -11,5 +11,5 @@ spec:
         spec:
           containers:
           - name: db-cleaner
-            image: ghbadr/database-cleaner:5ae844c8
+            image: ghbadr/database-cleaner:14150682
           restartPolicy: OnFailure
