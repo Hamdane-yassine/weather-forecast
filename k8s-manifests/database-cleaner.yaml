@@ -1,0 +1,15 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: db-cleaner
+  namespace: sdtd-project
+spec:
+  schedule: "*/10 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: db-cleaner
+            image: ghbadr/database-cleaner
+          restartPolicy: OnFailure
