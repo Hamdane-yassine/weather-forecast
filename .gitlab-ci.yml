@@ -4,6 +4,7 @@ stages:
   - back-deploy
   - producer-deploy
   - consumer-deploy
+  - database-cleaner-deploy
 
 .build_template: &build_template
   stage: build
@@ -67,6 +68,11 @@ build-consumer:
   variables:
     COMPONENT: "consumer"
 
+build-database-cleaner:
+  extends: .build_template
+  variables:
+    COMPONENT: "database-cleaner"
+
 deploy-frontend:
   stage: front-deploy
   extends: .update_k8s_manifest_template
@@ -90,5 +96,11 @@ deploy-consumer:
   extends: .update_k8s_manifest_template
   variables:
     COMPONENT: "consumer"
+
+deploy-database-cleaner:
+  stage: database-cleaner-deploy
+  extends: .update_k8s_manifest_template
+  variables:
+    COMPONENT: "database-cleaner"
 
 
