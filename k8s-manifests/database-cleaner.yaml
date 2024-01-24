@@ -11,21 +11,5 @@ spec:
         spec:
           containers:
           - name: db-cleaner
-            image: ghbadr/database-cleaner:5ae844c8
-            env:
-            - name: MONGODB_URL
-              valueFrom:
-                configMapKeyRef:
-                  name: database-config
-                  key: MONGODB_URL
-            - name: MONGODB_DB_NAME
-              valueFrom:
-                configMapKeyRef:
-                  name: database-config
-                  key: MONGODB_DB_NAME
-            - name: MONGODB_COLLECTION
-              valueFrom:
-                configMapKeyRef:
-                  name: database-config
-                  key: MONGODB_COLLECTION
+            image: ghbadr/database-cleaner:14150682
           restartPolicy: OnFailure
